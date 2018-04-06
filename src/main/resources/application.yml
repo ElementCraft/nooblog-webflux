@@ -9,7 +9,8 @@ spring:
     change-log: classpath:/liquibase/master.xml
   thymeleaf:
     cache: false
-    mode: HTML5
+    mode: HTML
+    check-template: false
 
 server:
   tomcat:

@@ -28,7 +28,7 @@
                 <img class="nav-logo" th:src="@{/images/logo.png}" alt="菜鸟博客" style="margin-left:12px;" mobile="" />
             </div>
 
-            <ul th:if="${session.user != null}" class="layui-nav layui-bg-green nav-right" lay-filter="">
+            <ul th:if="${session.containsKey('user')}" class="layui-nav layui-bg-green nav-right" lay-filter="">
 
                 <li class="layui-nav-item" pc="">
                     <a th:href="@{'/blog/' + ${session.user.getAccount()}}">
@@ -80,7 +80,7 @@
                 </script>
             </ul>
 
-            <ul th:if="${session.user == null}" class="layui-nav layui-bg-green nav-right" lay-filter="">
+            <ul th:if="${!session.containsKey('user')}" class="layui-nav layui-bg-green nav-right" lay-filter="">
 
                 <li class="layui-nav-item" pc="">
                     <a id="btnRegist" href="#">注册</a>
