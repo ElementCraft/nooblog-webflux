@@ -29,6 +29,7 @@ public class ReactiveSecurityConfig {
 
     @Bean
     public MapReactiveUserDetailsService userDetailsService() {
+        // FIXME
         UserDetails user = User.withDefaultPasswordEncoder()
                 .username("user")
                 .password("123")

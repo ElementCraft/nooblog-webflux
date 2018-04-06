@@ -22,12 +22,24 @@ public class UserColumn extends BasePojo {
     @JoinColumn(name = "user_id")
     private User user;
 
+    /**
+     * 父级栏目ID
+     */
     private Long parentId;
 
+    /**
+     * 栏目名称
+     */
     private String title;
 
+    /**
+     * 排序
+     */
     private Integer sortLevel;
 
+    /**
+     * 是否默认栏目
+     */
     private Boolean isDefault;
 
 }

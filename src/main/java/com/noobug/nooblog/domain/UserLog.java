@@ -23,8 +23,6 @@ public class UserLog extends BasePojo {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private ZonedDateTime logTime;
-
     private String logIp;
 
 }

@@ -27,6 +27,4 @@ public class UserFavorite extends BasePojo {
     @JoinColumn(name = "article_id")
     private Article article;
 
-    private ZonedDateTime favoriteTime;
-
 }

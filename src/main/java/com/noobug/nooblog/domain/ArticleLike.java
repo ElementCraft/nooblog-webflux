@@ -28,6 +28,4 @@ public class ArticleLike extends BasePojo {
     private Article article;
 
     private Integer status;
-
-    private ZonedDateTime likeTime;
 }
