@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh_CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+</head>
+<body>
+
+<div class="layui-header" th:fragment="header">
+    <h2 class="layui-logo" style="font-size:24px;">管理员后台</h2>
+    <!-- 头部区域 -->
+    <ul class="layui-nav layui-layout-right">
+
+        <li class="layui-nav-item" th:if="${session.admin ne null}">
+            <a href="javascript:;">
+                <img src="http://t.cn/RCzsdCq" class="layui-nav-img"/>
+                <span th:text="${session.admin.getName()}"></span>
+            </a>
+            <dl class="layui-nav-child">
+                <dd><a href="">基本资料</a></dd>
+                <dd><a href="">安全设置</a></dd>
+            </dl>
+        </li>
+        <li class="layui-nav-item">
+            <a id="btnAdminLogout" href="#">注销</a>
+        </li>
+    </ul>
+
+    <script>
+        layui.use(['element', 'layer'], function () {
+            var layer = layui.layer;
+            var $ = layui.jquery;
+            $("#btnAdminLogout").on("click", function (e) {
+                e.preventDefault();
+
+                var load = layer.load(1);
+                $.ajax({
+                    url: "/api/admin/logout",
+                    type: "PUT",
+                    dataType: "json",
+                    success: function (data) {
+                        layer.close(load);
+                        window.location.href = "/adminLogin";
+                        return false;
+                    }
+                });
+            });
+        });
+    </script>
+</div>
+
+<div class="layui-side-scroll" th:fragment="sidebar">
+    <!-- 左侧导航区域 -->
+    <ul class="layui-nav layui-nav-tree">
+        <li class="layui-nav-item layui-nav-itemed">
+            <a class="" href="javascript:;">信息管理</a>
+            <dl class="layui-nav-child">
+                <dd><a th:href="@{/admin/admin_list}" class="layui-this">管理员列表</a></dd>
+                <dd><a th:href="@{/admin/user_list}">用户列表</a></dd>
+                <dd><a th:href="@{/admin/article_list}">文章列表</a></dd>
+                <dd><a href="">超链接</a></dd>
+            </dl>
+        </li>
+        <li class="layui-nav-item">
+            <a href="javascript:;">日志管理</a>
+            <dl class="layui-nav-child">
+                <dd><a th:href="@{/admin/admin_log}">管理员登录日志</a></dd>
+                <dd><a th:href="@{/admin/user_log}">用户登录日志</a></dd>
+                <dd><a href="">超链接</a></dd>
+            </dl>
+        </li>
+        <li class="layui-nav-item"><a href="">云市场</a></li>
+        <li class="layui-nav-item"><a href="">发布商品</a></li>
+    </ul>
+</div>
+
+<div class="layui-footer" th:fragment="footer">
+    <!-- 底部固定区域 -->
+    © layui.com - 底部固定区域
+</div>
+</body>
+</html>

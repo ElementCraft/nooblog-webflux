@@ -34,4 +34,8 @@ public class ErrorCode {
     public void setMsg(String msg) {
         this.msg = msg;
     }
+
+    public static ErrorCode of(Integer code, String msg) {
+        return new ErrorCode(code, msg);
+    }
 }

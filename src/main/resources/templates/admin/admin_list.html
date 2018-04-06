@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh_CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+
+    <link th:href="@{/layui/css/layui.css}" rel="stylesheet"/>
+    <link th:href="@{/css/public.css}" rel="stylesheet"/>
+    <link th:href="@{/css/admin.css}" rel="stylesheet"/>
+
+    <script th:src="@{/layui/layui.js}"></script>
+    <script th:src="@{/js/public.js}"></script>
+
+    <title>管理员后台 | blog.noobug.org</title>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header" th:include="admin/include :: header"></div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll" th:include="admin/include :: sidebar">
+            <!-- 左侧导航区域 -->
+
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="padding:24px;">
+            <h1 class="admin-header">管理员列表
+                <small> —— Admin List</small>
+            </h1>
+            <br/>
+            <a id="btnNewAdmin" class="layui-btn">新增管理员</a>
+            <br/>
+            <table id="tableAdmin" lay-filter="admin-table"></table>
+        </div>
+    </div>
+
+    <div class="layui-footer" th:include="admin/include :: footer">
+    </div>
+</div>
+
+<script type="text/html" id="tplNewAdmin">
+    <br/>
+    <div>
+        <form class="layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label">帐号</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="account" required="required" lay-verify="required" placeholder="请输入帐号"
+                           autocomplete="off" class="layui-input"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">昵称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="name" placeholder="不填默认为帐号" autocomplete="off" class="layui-input"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">密码</label>
+                <div class="layui-input-inline">
+                    <input type="password" name="password" required="required" lay-verify="required" placeholder="请输入密码"
+                           autocomplete="off" class="layui-input"/>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit="" lay-filter="formNewAdmin">添加</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</script>
+
+<script type="text/html" id="table-toolbar">
+    {{#  if(d.status != 1){ }}
+    <a class="layui-btn layui-btn-sm" lay-event="unban">解禁</a>
+    {{# }else{ }}
+    <a class="layui-btn layui-btn-danger layui-btn-sm" lay-event="ban">禁用</a>
+    {{#  } }}
+</script>
+<script>
+    layui.use(['element', 'layer', 'table', 'form'], function () {
+        var element = layui.element;
+        var layer = layui.layer;
+        var $ = layui.jquery;
+        var table = layui.table;
+        var form = layui.form;
+
+        var tplNewAdmin = $("#tplNewAdmin");
+        // 新增管理员按钮
+        $("#btnNewAdmin").on("click", function () {
+            layer.open({
+                type: 1,
+                title: "添加管理员",
+                skin: 'layui-layer-rim',
+                area: ['400px', '300px'],
+                content: tplNewAdmin.html()
+            });
+        });
+
+        // 表格
+        table.render({
+            elem: '#tableAdmin'
+            , height: 400
+            , url: '/api/admin/all'
+            , page: true
+            , cols: [[
+                {field: 'id', title: 'ID', width: 120, fixed: 'left'}
+                , {field: 'account', title: '帐号'}
+                , {field: 'name', title: '昵称'}
+                , {
+                    field: 'gmtCreate', title: '添加日期'
+                    , templet: function (d) {
+                        return new Date(d.gmtCreate * 1000).Format("yyyy-MM-dd hh:mm:ss");
+                    }
+                }
+                , {title: '操作', width: 160, toolbar: '#table-toolbar'}
+            ]],
+            response: {
+                countName: 'totalElements'
+                , dataName: 'content'
+            }
+        });
+
+        // 表格工具栏响应
+        table.on('tool(admin-table)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            var tr = obj.tr;
+
+            if (layEvent === 'ban') {
+                layer.confirm("真的封禁管理员：" + data.name + "吗", function (index) {
+                    $.ajax({
+                        url: "/api/admin/ban",
+                        type: "PUT",
+                        data: {"id": data.id},
+                        dataType: "json",
+                        success: function (data) {
+                            layer.close(index);
+                            if (data.success) {
+                                window.location.href = "/admin/admin_list";
+                                return false;
+                            } else {
+                                layer.msg(data.msg);
+                            }
+                        }
+                    });
+                });
+            } else if (layEvent === 'unban') {
+                layer.confirm("解封管理员：" + data.name + "吗", function (index) {
+                    $.ajax({
+                        url: "/api/admin/unban",
+                        type: "PUT",
+                        data: {"id": data.id},
+                        dataType: "json",
+                        success: function (data) {
+                            layer.close(index);
+                            if (data.success) {
+                                window.location.href = "/admin/admin_list";
+                                return false;
+                            } else {
+                                layer.msg(data.msg);
+                            }
+                        }
+                    });
+                });
+            }
+        });
+
+        // 新增管理员表单提交
+        form.on('submit(formNewAdmin)', function (data) {
+            var load = layer.load(1);
+            $.ajax({
+                url: "/api/admin/new",
+                type: "POST",
+                data: JSON.stringify(data.field),
+                traditional: true,
+                dataType: "json",
+                contentType: "application/json;charset=UTF-8",
+                success: function (data) {
+                    layer.close(load);
+                    if (data.success) {
+                        window.location.href = "/admin/admin_list";
+                        return false;
+                    } else {
+                        layer.msg(data.msg);
+                    }
+                }
+            });
+
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

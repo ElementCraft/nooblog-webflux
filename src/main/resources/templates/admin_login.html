@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh_CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+
+    <link th:href="@{/layui/css/layui.css}" rel="stylesheet"/>
+
+    <script th:src="@{/layui/layui.js}"></script>
+
+    <title>管理员登录页面 | blog.noobug.org</title>
+
+    <style>
+        body {
+            background-color: lightblue;
+        }
+
+        .login-box {
+            border-radius: 10px;
+            box-shadow: 10px 10px 5px #0C0C0C;
+            background-color: #2D93CA;
+            padding: 25px 35px;
+        }
+
+        .layui-form-label {
+            font-size: 16px;
+        }
+
+        .layui-input-block input {
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+<div style="height: 150px;"></div>
+
+<div class="layui-row">
+    <div class="layui-col-lg4 layui-col-md4 layui-col-lg-offset4 layui-col-md-offset4 login-box">
+        <h2 style="font-size: 32px;text-align: center;">菜鸟博客后台管理员登录</h2>
+
+        <br/>
+        <br/>
+        <div>
+            <form method="post" th:action="@{/api/admin/login}" class="layui-form">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">管理员账号</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="account" required="required" lay-verify="required"
+                               placeholder="请输入账号..." autocomplete="off" class="layui-input"/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">管理员密码</label>
+                    <div class="layui-input-block">
+                        <input type="password" name="password" required="required" lay-verify="required"
+                               placeholder="请输入密码..." autocomplete="off" class="layui-input"/>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit="" lay-filter="formAdminLogin">登录</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['element', 'form','layer'], function(){
+        var element = layui.element;
+        var form = layui.form;
+        var layer = layui.layer;
+        var $ = layui.jquery;
+
+        // 管理员登录提交
+        form.on('submit(formAdminLogin)', function(data){
+            var load = layer.load(1);
+            $.ajax({
+                url: "/api/admin/login",
+                type: "POST",
+                data: JSON.stringify(data.field),
+                traditional: true,
+                dataType: "json",
+                contentType: "application/json;charset=UTF-8",
+                success: function(data){
+                    layer.close(load);
+                    if(data.success){
+                        window.location.href = "/admin/index";
+                        return false;
+                    }else{
+                        layer.msg(data.msg);
+                    }
+                }
+            });
+
+            return false;
+        });
+    });
+
+</script>
+</body>
+</html>

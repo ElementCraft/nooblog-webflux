@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh_CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+</head>
+<body>
+
+<div class="layui-header" th:fragment="header">
+    <h2 class="layui-logo" style="font-size:24px;">用户后台</h2>
+    <!-- 头部区域 -->
+    <ul class="layui-nav layui-layout-right">
+
+        <li class="layui-nav-item" th:if="${session.user ne null}">
+            <a href="javascript:;">
+                <img th:src="@{'/' + ${session.user.getIconPath()}}" class="layui-nav-img"/>
+                <span th:text="${session.user.getNickName()}"></span>
+            </a>
+            <dl class="layui-nav-child">
+                <dd><a id="btnUserLogout" href="#">退出登录</a></dd>
+            </dl>
+        </li>
+    </ul>
+
+    <script>
+        layui.use(['element', 'layer'], function () {
+            var layer = layui.layer;
+            var $ = layui.jquery;
+            $("#btnUserLogout").on("click", function (e) {
+                e.preventDefault();
+
+                var load = layer.load(1);
+                $.ajax({
+                    url: "/api/user/logout",
+                    type: "PUT",
+                    dataType: "json",
+                    success: function (data) {
+                        layer.close(load);
+                        window.location.href = "/index";
+                        return false;
+                    }
+                });
+            });
+        });
+    </script>
+</div>
+
+<div class="layui-side-scroll" th:fragment="sidebar">
+    <!-- 左侧导航区域 -->
+    <ul class="layui-nav layui-nav-tree">
+        <li class="layui-nav-item layui-nav-itemed">
+            <a href="javascript:;">快速入口</a>
+            <dl class="layui-nav-child">
+                <dd><a th:href="@{/user/edit_profile}" class="layui-this">编辑资料</a></dd>
+                <dd><a th:href="@{/user/new_article}">新增文章</a></dd>
+            </dl>
+        </li>
+        <li class="layui-nav-item">
+            <a class="" href="javascript:;">信息管理</a>
+            <dl class="layui-nav-child">
+                <dd><a th:href="@{/user/profile}">个人资料</a></dd>
+                <dd><a th:href="@{/user/article_list}">文章列表</a></dd>
+                <dd><a th:href="@{/user/favorite_list}">我的收藏</a></dd>
+                <dd><a th:href="@{/user/attention_list}">我的关注</a></dd>
+                <dd><a th:href="@{/user/fans_list}">我的Fans</a></dd>
+            </dl>
+        </li>
+        <li class="layui-nav-item">
+            <a href="javascript:;">日志管理</a>
+            <dl class="layui-nav-child">
+                <dd><a th:href="@{/user/log}">登录日志</a></dd>
+
+            </dl>
+        </li>
+    </ul>
+</div>
+
+<div class="layui-footer" th:fragment="footer">
+    <!-- 底部固定区域 -->
+    © layui.com - 底部固定区域
+</div>
+</body>
+</html>

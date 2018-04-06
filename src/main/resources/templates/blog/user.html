@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh_CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <meta name="keywords" content="blog,博客,菜鸟博客,IT,IT博客,noobug"/>
+    <title> 用户 </title>
+
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}"/>
+    <link rel="stylesheet" th:href="@{/bootstrap-3.3.7-dist/css/bootstrap.css}"/>
+    <link rel="stylesheet" th:href="@{/css/public.css}"/>
+    <link rel="stylesheet" th:href="@{/css/nav.css}"/>
+    <link rel="stylesheet" th:href="@{/css/footer.css}"/>
+    <link rel="stylesheet" th:href="@{/css/blog.css}"/>
+
+    <script th:src="@{/layui/layui.js}"></script>
+    <script th:src="@{/bootstrap-3.3.7-dist/js/jquery.min.js}"></script>
+    <script th:src="@{/bootstrap-3.3.7-dist/js/bootstrap.js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/public.js}"></script>
+</head>
+<body>
+<div class="main-body">
+    <!-- 顶部导航栏 -->
+    <div class="nav-top layui-bg-green">
+
+        <div class="nav-logo">
+            <div class="logo-name">用户昵称</div>
+            <div class="name-tip">用户签名什么的</div>
+        </div>
+        <ul class="layui-nav layui-bg-green nav-right" lay-filter="">
+
+            <li class="layui-nav-item" pc="">
+                <a href="">我的博客<span class="layui-badge">9</span></a>
+            </li>
+            <li class="layui-nav-item">
+                <a href="#">
+                    <img src="images/default_icon.png" class="layui-nav-img"/>
+                    <span pc="">FullStack</span>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd mobile=""><a href="javascript:;">我的博客</a></dd>
+                    <dd><a href="javascript:;">修改信息</a></dd>
+                    <dd><a href="javascript:;">安全管理</a></dd>
+                    <dd><a href="javascript:;">退出登录</a></dd>
+                </dl>
+            </li>
+
+        </ul>
+    </div>
+    <!-- 主体内容 -->
+    <div class="body-content">
+        <div class="layui-row">
+            <div class="layui-col-md2 layui-col-sm3" pc="">
+
+                <!-- 侧边栏 -->
+                <div class="sidebar">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">个人信息</div>
+                        <div class="panel-body">
+                            <div class="head-img">
+                                <img src="images/i2.jpg" alt="头像"/>
+                            </div>
+                            <ul class="measure_ul">
+                                <li class="measure_item">文章数：12</li>
+                                <li class="measure_item">评论数：21</li>
+                                <li class="measure_item">关注数：21</li>
+                                <li class="measure_item">粉丝数：212</li>
+                                <li class="measure_item">总访问量：331233333</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div style="border:1px solid #ddd">
+                        <div class="wrap">
+                            <div class="accordion">
+                                <p class="content-table" style="background-color: #eee">
+                                    <span class="glyphicon glyphicon-plus plus-icon" aria-hidden="true"></span>
+                                    <span class="num1 results-ul">全部博文</span>
+                                </p>
+                                <div class="accordion">
+                                    <p class="content-table">
+                                        <span class="glyphicon plus-icon" aria-hidden="true"></span>
+                                        <span class="num1 results-ul">随笔</span>
+                                    </p>
+                                    <!--无下拉面板-->
+                                    <p class="content-table" style="height: 38px;">
+                                        <span class="glyphicon glyphicon-plus plus-icon" aria-hidden="true"></span>
+                                        <span class="num1 results-ul">名著</span>
+                                    </p>
+                                    <!--有下拉面板-->
+                                    <div class="accordion">
+                                        <p class="content-table" style="height: 38px;">
+                                            <span class="num1 results-ul">西游</span>
+                                        </p>
+                                        <p class="content-table" style="height: 38px;">
+                                            <span class="num1 results-ul">红楼</span>
+                                        </p>
+                                    </div>
+                                    <!--无下拉面板-->
+                                    <p class="content-table" style="height: 38px;">
+                                        <span class="num1 results-ul">小说</span>
+                                    </p>
+                                    <!--无下拉面板END-->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--无下拉面板-->
+                        <p class="content-table" style="height: 38px;">
+                            <span class="num1 results-ul">13700000001</span>
+                        </p>
+                        <p class="content-table" style="height: 38px;">
+                            <span class="num1 results-ul">13700000001</span>
+                        </p>
+                        <p class="content-table" style="height: 38px;">
+                            <span class="num1 results-ul">13700000001</span>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="layui-col-md9 layui-col-sm8 layui-col-xs12">
+                <div class="main-content">
+                    <div class="content-header">博文列表<span>查看更多...</span></div>
+
+                    <table class="table table-condensed table-hover">
+                        <tr class="active">
+                            <td>标题</td>
+                            <td>发布时间</td>
+                            <td>评论</td>
+                        </tr>
+                        <tr>
+                            <td class="td-container">通过</td>
+                            <td>2017-10-19</td>
+                            <td>12</td>
+                        </tr>
+                        <tr>
+                            <td class="td-container">通过添加 .table-hover 类可以让 中的每一行对鼠标悬停状态作出响应。</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-footer footer footer-doc">
+        <p>© 2017<a href="/">blog.noobug.org</a> 闽ICP备17017285</p>
+        <p>转载文章请注明出处</p>
+        <p>
+            <a href="http://fly.layui.com/jie/3147.html" target="_blank">捐赠我们</a>
+            <a href="mailto:976228284@qq.com">联系站长</a>
+            <a href="http://fly.layui.com/jie/4281.html" target="_blank">Git仓库</a>
+        </p>
+    </div>
+</div>
+
+
+<div class="top-tool">
+    <i class="layui-icon" style="font-size:40px;">&#xe604;</i>
+</div>
+
+<script>
+    $(document).ready(function(){
+
+        $(".accordion>p>.plus-icon").click(function(){
+            if($(this).parent().hasClass("active")){
+                $(this).parent().find(".plus-icon").removeClass("glyphicon-minus").addClass("glyphicon-plus");
+                $(this).parent().removeClass("active").next().slideUp();
+            }
+            else{
+                $(this).parent().find(".plus-icon").removeClass("glyphicon-plus").addClass("glyphicon-minus");
+                $(this).parent().addClass("active").next().slideDown();
+            }
+        });
+    });
+    layui.use('element', function () {
+        var element = layui.element;
+        var $ = layui.jquery;
+
+        $(".top-tool").on("click", function () {
+            window.scrollTo(0, 0);
+        });
+    });
+</script>
+</body>
+</html>

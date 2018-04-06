@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh_CN" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    <link th:href="@{/layui/css/layui.css}" rel="stylesheet" />
+    <link th:href="@{/EditorMD/css/editormd.min.css}" rel="stylesheet" />
+    <link th:href="@{/css/public.css}" rel="stylesheet" />
+    <link th:href="@{/css/admin.css}" rel="stylesheet" />
+
+    <script th:src="@{/jquery.min.js}"></script>
+    <script th:src="@{/layui/layui.js}"></script>
+    <script th:src="@{/EditorMD/editormd.js}"></script>
+    <script th:src="@{/js/public.js}"></script>
+
+    <title>管理员后台 | blog.noobug.org</title>
+</head>
+
+<body class="layui-layout-body">
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header" th:include="user/include :: header"></div>
+
+        <div class="layui-side layui-bg-black">
+            <div class="layui-side-scroll" th:include="user/include :: sidebar">
+                <!-- 左侧导航区域 -->
+
+            </div>
+        </div>
+
+        <div id="divBody" class="layui-body">
+            <!-- 内容主体区域 -->
+            <div style="padding:24px;">
+                <h1 class="user-header">新增文章
+                    <small> —— New Article</small>
+                </h1>
+                <br/>
+                <div>
+                    <form class="layui-form">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">文章标题</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="title" required="required" lay-verify="required" placeholder="请输入文章标题" autocomplete="off" class="layui-input"
+                                />
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <input id="inputColumnHidden" type="hidden" name="columnId" />
+                            <label class="layui-form-label">文章栏目</label>
+                            <div class="layui-input-inline">
+                                <select id="selectColumn1" lay-filter="selectColumn1">
+                                    <option value="">默认栏目</option>
+                                </select>
+                            </div>
+                            <div class="layui-input-inline">
+                                <select data-active="0" id="selectColumn2" lay-filter="selectColumn2">
+                                    <option value="">无</option>
+                                </select>
+                            </div>
+                            <div class="layui-input-inline">
+                                <a id="btnAddColumn" class="layui-btn">新增栏目</a>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">文章类型</label>
+                            <div class="layui-input-inline">
+                                <select id="selectTypeFlag" name="typeFlag" lay-filter="selectTypeFlag">
+                                    <option value="1">原创</option>
+                                    <option value="2">转载</option>
+                                    <option value="3">翻译</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="divReprintUrl" class="layui-form-item">
+                            <label class="layui-form-label">转载自</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="reprintUrl" placeholder="请输入转载文章原文地址或出处..." autocomplete="off" class="layui-input" />
+                            </div>
+                        </div>
+                        <div id="divTranslateUrl" class="layui-form-item">
+                            <label class="layui-form-label">翻译自</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="translateUrl" placeholder="请输入翻译文章原文地址或出处..." autocomplete="off" class="layui-input" />
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <input id="inputLabelHidden" type="hidden" name="label" />
+                            <div class="layui-inline">
+                                <label class="layui-form-label">文章标签</label>
+                                <div class="layui-input-inline">
+                                    <input id="inputLabel" type="text" placeholder="输入标签名称..." autocomplete="off" class="layui-input" />
+                                </div>
+                                <div class="layui-input-inline" style="width:52px;">
+                                    <a id="btnAddLabel" class="layui-btn">＋</a>
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <div id="boxLabel" class="layui-btn-container">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">私密</label>
+                                <div class="layui-input-inline">
+                                    <input type="checkbox" value="true" name="isPrivate" lay-skin="switch" lay-text="开|关" />
+                                </div>
+                            </div>
+
+                            <div class="layui-inline">
+                                <label class="layui-form-label">置顶</label>
+                                <div class="layui-input-inline">
+                                    <input type="checkbox" value="true" name="isTop" lay-skin="switch" lay-text="开|关" />
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button class="layui-btn" lay-submit="" lay-filter="formNewArticle">确认保存</button>
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <div id="editor-md"></div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-footer" th:include="user/include :: footer">
+        </div>
+    </div>
+
+    <script type="text/html" id="modal-add-column">
+    <br/>
+    <br/>
+    <div>
+        <form class="layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label">栏目名称</label>
+                <div class="layui-input-inline">
+                    <input id="inputColumnTitle" type="text" name="title" required="required" lay-verify="required" placeholder="请输入栏目名称" autocomplete="off" class="layui-input"/>
+                </div>
+                <div class="layui-form-mid layui-word-aux">限定长度1-16</div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">所属栏目</label>
+                <div class="layui-input-inline">
+                    <select id="selectParentColumn" name="parentId" lay-filter="selectParentColumn">
+
+                    </select>
+                </div>
+                <div class="layui-form-mid layui-word-aux">新增二级栏目才需要选择此项</div>
+            </div>
+            <br/>
+            <br/>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit="" lay-filter="formAddColumn">新增栏目</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    </script>
+
+    <script>
+        layui.use(['element', 'layer', 'form'], function () {
+            var element = layui.element;
+            var layer = layui.layer;
+            var jQuery = layui.jquery;
+            var $ = jQuery;
+            var form = layui.form;
+            var selectColumn1 = $("#selectColumn1");
+            var selectColumn2 = $("#selectColumn2");
+            var inputColumnHidden = $("#inputColumnHidden");
+            var inputLabelHidden = $("#inputLabelHidden")
+            var idxModalAddColumn;
+
+            // 初始化隐藏
+            $("#divReprintUrl").hide();
+            $("#divTranslateUrl").hide();
+            selectColumn2.parent().hide();
+
+            // 初始化一级栏目
+            $.ajax({
+                url: "/api/user/col1",
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+
+                    if (data.success) {
+                        if (data.data) {
+                            for (var d of data.data) {
+                                selectColumn1.append('<option value="' + d.id + '">' + d.title + '</option>');
+                            }
+                            form.render('select');
+                        }
+                        return false;
+                    } else {
+                        layer.msg(data.msg);
+                    }
+                }
+            });
+
+            // 初始化markdown编辑器
+            var MD = editormd("editor-md", {
+                width: "96%",
+                height: 800,
+                path: '/EditorMD/lib/',
+                //theme: "dark",
+                //previewTheme: "dark",
+                //editorTheme: "pastel-on-dark",
+                codeFold: true,
+                //saveHTMLToTextarea: true,    // 保存 HTML 到 Textarea
+                searchReplace: true,
+                emoji: true,
+                taskList: true,
+                tex: true,                   // 开启科学公式TeX语言支持，默认关闭
+                flowChart: true,             // 开启流程图支持，默认关闭
+                sequenceDiagram: true,       // 开启时序/序列图支持，默认关闭,
+                imageUpload: true,
+                imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+                imageUploadURL: "./php/upload.php",
+                toolbarIcons: function () {
+                    return [
+                        "undo", "redo", "|",
+                        "bold", "del", "italic", "quote", "|",
+                        "list-ul", "list-ol", "hr", "|",
+                        "link", "reference-link", "image", "code", "code-block", "table", "datetime", "emoji", "html-entities", "pagebreak", "|",
+                        "watch", "preview", "fullscreen", "search", "|",
+                        "help", "info"
+                    ]
+                },
+                onfullscreen: function () {
+                    $("#divBody").css("z-index", "9999");
+                },
+                onfullscreenExit: function () {
+                    $("#divBody").css("z-index", "998");
+                }
+            });
+
+
+            // 新增栏目按钮响应
+            $("#btnAddColumn").on("click", function (e) {
+                e.preventDefault();
+                var modalAddColumn = $("#modal-add-column");
+
+                idxModalAddColumn = layer.open({
+                    type: 1,
+                    title: "新增栏目",
+                    skin: 'layui-layer-rim',
+                    area: ['550px', '300px'],
+                    content: modalAddColumn.html()
+                });
+
+                $("#selectParentColumn").append($("#selectColumn1").html());
+                form.render('select'); S
+            });
+
+            // 更新当前标签信息函数
+            var updateLabelHidden = function () {
+                var boxLabel = $("#boxLabel").children();
+                var str = "";
+                $.each(boxLabel, function (i, obj) {
+                    str += $(obj).data("label") + ";;";
+                });
+
+                inputLabelHidden.val(str);
+            }
+
+            // 添加标签按钮响应
+            $("#btnAddLabel").on("click", function (e) {
+                e.preventDefault();
+                var inputLabel = $("#inputLabel");
+                var boxLabel = $("#boxLabel");
+
+                var str = inputLabel.val();
+
+                if (str) {
+                    str = str.trim();
+
+                    if (str.length > 16 || str.length == 0) {
+                        layer.msg("标签文本长度限定1-16个字符");
+                        return;
+                    }
+
+                    var node = $('<a style="margin-bottom:0px;" class="layui-btn layui-bg-blue" data-label="' + str + '">' + str + ' X</a>');
+                    boxLabel.append(node);
+                    node.on("click", function (e) {
+                        e.preventDefault();
+                        $(this).remove();
+                        updateLabelHidden();
+                    });
+                    inputLabel.val("");
+                    updateLabelHidden();
+                }
+
+            });
+
+            // 文章类型选择框改变选项
+            form.on('select(selectTypeFlag)', function (data) {
+                var v = data.value;
+                if (v == 1) {
+                    $("#divReprintUrl").hide();
+                    $("#divTranslateUrl").hide();
+                } else if (v == 2) {
+                    $("#divReprintUrl").show();
+                    $("#divTranslateUrl").hide();
+                } else if (v == 3) {
+                    $("#divReprintUrl").hide();
+                    $("#divTranslateUrl").show();
+                }
+            });
+
+            // 一级栏目选择框改变
+            form.on('select(selectColumn1)', function (data) {
+                var v = data.value;
+
+                if (!v || v == null || v == undefined || v == "") {
+                    selectColumn2.data("active", "0");
+                    selectColumn2.parent().hide();
+                    inputColumnHidden.val("");
+                    return false;
+                }
+
+                inputColumnHidden.val(v);
+
+                $.ajax({
+                    url: "/api/user/col2",
+                    type: "GET",
+                    data: { "id": v },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.success) {
+                            if (!data.data || data.data.length == 0) {
+                                selectColumn2.data("active", "0");
+                                selectColumn2.parent().hide();
+                            } else {
+                                selectColumn2.data("active", "1");
+                                selectColumn2.parent().show();
+                                selectColumn2.html("");
+                                selectColumn2.append('<option value="">无</option>');
+                                for (var d of data.data) {
+                                    selectColumn2.append('<option value="' + d.id + '">' + d.title + '</option>');
+                                }
+                                form.render('select');
+                            }
+                            return false;
+                        } else {
+                            layer.msg(data.msg);
+                        }
+                    }
+                });
+            });
+
+            // 二级栏目选择框改变
+            form.on('select(selectColumn2)', function (data) {
+                var v = data.value;
+
+                if (!v || v == null || v == undefined || v == "") {
+                    inputColumnHidden.val(selectColumn1.val());
+                    return false;
+                }
+
+                inputColumnHidden.val(v);
+            });
+
+            // 新增文章表单提交
+            form.on('submit(formNewArticle)', function (data) {
+                console.log(data.field);
+
+                data.field["userColumn"] = !data.field["columnId"] ? null : {
+                    id: data.field["columnId"]
+                };
+
+                data.field["content"] = data.field["editor-md-markdown-doc"];
+
+                var load = layer.load(1);
+                $.ajax({
+                    url: "/api/article/new",
+                    type: "POST",
+                    data: JSON.stringify(data.field),
+                    traditional: true,
+                    dataType: "json",
+                    contentType: "application/json;charset=UTF-8",
+                    success: function (data) {
+                        layer.close(load);
+                        if (data.success) {
+                            window.location.href = "/user/article_list";
+                            return false;
+                        } else {
+                            layer.msg(data.msg);
+                        }
+                    }
+                });
+
+                return false;
+            });
+
+            // 新增栏目表单提交
+            form.on('submit(formAddColumn)', function (data) {
+
+                var load = layer.load(1);
+                $.ajax({
+                    url: "/api/user/addColumn",
+                    type: "POST",
+                    data: data.field,
+                    dataType: "json",
+                    success: function (result) {
+                        layer.close(load);
+                        if (result.success) {
+                            layer.close(idxModalAddColumn);
+
+                            if (!result.data.parentId || result.data.parentId == 0) {
+                                selectColumn1.append('<option value="' + result.data.id + '">' + result.data.title + '</option>');
+                            }
+
+                            form.render('select');
+                            return false;
+                        } else {
+                            layer.msg(result.msg);
+                        }
+                    }
+                });
+
+                return false;
+            });
+        });
+    </script>
+</body>
+
+</html>
