@@ -18,6 +18,7 @@ public class ReactiveSecurityConfig {
     SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
 
         http
+                .csrf().disable()
                 .authorizeExchange()
                 .anyExchange()
                 .permitAll();

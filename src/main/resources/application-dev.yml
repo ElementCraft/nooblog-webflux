@@ -9,7 +9,7 @@ spring:
         active: dev
     devtools:
         restart:
-            enabled: false
+            enabled: true
         livereload:
             enabled: false
     datasource:

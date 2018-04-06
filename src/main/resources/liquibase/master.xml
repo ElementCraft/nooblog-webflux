@@ -8,5 +8,8 @@
 
     <include file="classpath:/liquibase/changelog/2018040603510001-Role.xml"/>
     <include file="classpath:/liquibase/changelog/2018040623050001-SystemConfig.xml"/>
+    <include file="classpath:/liquibase/changelog/2018040701440001-Article.xml"/>
+    <include file="classpath:/liquibase/changelog/2018040701520001-User.xml"/>
+
 
 </databaseChangeLog>

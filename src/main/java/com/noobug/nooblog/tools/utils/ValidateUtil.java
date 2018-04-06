@@ -51,7 +51,7 @@ public class ValidateUtil {
      * @param str 字符串
      * @return
      */
-    public static Boolean AllChinese(String str) {
+    public static Boolean allChinese(String str) {
         return str.matches("^[\u4E00-\u9FA5]+$");
     }
 
@@ -83,7 +83,27 @@ public class ValidateUtil {
      * @param phone 字符串
      * @return
      */
-    public static boolean phoneNumber(String phone) {
+    public static boolean isPhone(String phone) {
         return phone.matches("^1([34578])\\d{9}$");
+    }
+
+    /**
+     * 验证是否全为空格
+     *
+     * @param str 验证字符串
+     * @return
+     */
+    public static boolean allSpace(String str) {
+        return str.length() >= 1 && "".equals(str.trim());
+    }
+
+    /**
+     * 验证是否合法邮箱格式
+     *
+     * @param str 验证字符串
+     * @return
+     */
+    public static boolean isEmail(String str) {
+        return str.matches("^\\s*\\w+(?:\\.{0,1}[\\w-]+)*@[a-zA-Z0-9]+(?:[-.][a-zA-Z0-9]+)*\\.[a-zA-Z]+\\s*$");
     }
 }
