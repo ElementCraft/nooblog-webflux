@@ -1,0 +1,37 @@
+logging:
+    level:
+        ROOT: WARN
+        com.noobug: INFO
+        org.springframework: WARN
+
+spring:
+    profiles:
+        active: prod
+    devtools:
+        restart:
+            enabled: false
+        livereload:
+            enabled: false
+    datasource:
+        type: com.zaxxer.hikari.HikariDataSource
+        url: jdbc:mysql://localhost:3306/spring_boot?useUnicode=true&characterEncoding=utf8&useSSL=false
+        username: root
+        password: Daedalus@130
+    jpa:
+        hibernate:
+            ddl-auto: none
+        database: MYSQL
+        show-sql: false
+        properties:
+            hibernate.id.new_generator_mappings: true
+            hibernate.cache.use_second_level_cache: false
+            hibernate.cache.use_query_cache: false
+            hibernate.generate_statistics: false
+
+redis:
+    host: 127.0.0.1
+    password: daedalus
+    database: 4
+
+server:
+    port: 80

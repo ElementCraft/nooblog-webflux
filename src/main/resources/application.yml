@@ -1,0 +1,13 @@
+spring:
+  profiles:
+    active: #spring.profiles.active#
+  jackson:
+    time-zone: GMT+8
+  jpa:
+    open-in-view: false
+  liquibase:
+    change-log: classpath:/liquibase/master.xml
+
+server:
+  tomcat:
+    uri-encoding: UTF-8
