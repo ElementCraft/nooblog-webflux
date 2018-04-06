@@ -21,4 +21,10 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="201804060425" author="ElementCraft">
+        <addColumn tableName="role">
+            <column name="code" type="varchar(32)" afterColumn="id"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

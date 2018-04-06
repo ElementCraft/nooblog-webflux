@@ -16,5 +16,12 @@ public class Role extends BasePojo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private String code;
+
     private String name;
+
+    @Column(name = "is_deleted")
+    private Boolean deleted;
+
 }
