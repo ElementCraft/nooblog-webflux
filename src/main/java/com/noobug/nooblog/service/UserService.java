@@ -3,12 +3,15 @@ package com.noobug.nooblog.service;
 import com.noobug.nooblog.consts.UserConst;
 import com.noobug.nooblog.consts.error.UserError;
 import com.noobug.nooblog.domain.User;
+import com.noobug.nooblog.domain.UserLog;
 import com.noobug.nooblog.domain.UserRole;
+import com.noobug.nooblog.repository.UserLogRepository;
 import com.noobug.nooblog.repository.UserRepository;
 import com.noobug.nooblog.repository.UserRoleRepository;
 import com.noobug.nooblog.tools.entity.Result;
 import com.noobug.nooblog.tools.utils.SecurityUtil;
 import com.noobug.nooblog.tools.utils.ValidateUtil;
+import com.noobug.nooblog.web.dto.UserLoginDTO;
 import com.noobug.nooblog.web.dto.UserRegDTO;
 import com.noobug.nooblog.web.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -30,12 +33,21 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
+    private UserLogRepository userLogRepository;
+
+    @Autowired
     private UserRoleRepository userRoleRepository;
 
     @Autowired
     private UserMapper userMapper;
 
 
+    /**
+     * 用户注册
+     *
+     * @param regDTO 注册DTO
+     * @return 结果
+     */
     public Mono<Result> reg(UserRegDTO regDTO) {
 
         // 注册参数合法性判断
@@ -101,5 +113,38 @@ public class UserService {
                     return userRoleRepository.save(userRole);
                 })
                 .orElseThrow(() -> new Exception("[设置默认用户角色] 数据库无该角色code"));
+    }
+
+    /**
+     * 用户登录日志
+     *
+     * @return
+     */
+    private Mono<Void> addUserLog(User user, String ip) {
+        userLogRepository.save(new UserLog(null, user, ip));
+        return Mono.empty();
+    }
+
+    /**
+     * 用户登录
+     *
+     * @param loginDTO 登录DTO
+     * @return 结果
+     */
+    public Mono<Result<Object>> login(UserLoginDTO loginDTO, String ip) {
+        // 加密密码
+        String md5 = SecurityUtil.md5(loginDTO.getPassword());
+
+        return userRepository.findByAccountAndDeleted(loginDTO.getAccount(), Boolean.FALSE)
+                .map(user -> {
+                    if (user.getPassword().equals(md5)) {
+
+                        return addUserLog(user, ip)
+                                .thenReturn(Result.ok());
+                    } else {
+                        return Mono.just(Result.error(UserError.LOGIN_INCORRECT_PASSWORD));
+                    }
+                })
+                .orElse(Mono.just(Result.error(UserError.LOGIN_NOT_EXIST_ACCOUNT)));
     }
 }

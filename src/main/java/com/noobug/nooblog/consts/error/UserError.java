@@ -3,10 +3,10 @@ package com.noobug.nooblog.consts.error;
 import com.noobug.nooblog.tools.entity.ErrorCode;
 
 public class UserError {
-    public static final ErrorCode LOGIN_INCORRECT_ACCOUNT_OR_PASSWORD
-            = ErrorCode.of(1, "帐号不存在或密码错误");
-
-    public static final ErrorCode LOGIN_BANNED = ErrorCode.of(2, "该用户已被封禁，详情联系网站管理员");
+    public static final ErrorCode LOGIN_REQUIRE_IS_NULL = ErrorCode.of(1, "必填项不能为空");
+    public static final ErrorCode LOGIN_NOT_EXIST_ACCOUNT = ErrorCode.of(2, "帐号不存在");
+    public static final ErrorCode LOGIN_INCORRECT_PASSWORD = ErrorCode.of(3, "密码错误");
+    public static final ErrorCode LOGIN_BANNED = ErrorCode.of(4, "该用户已被封禁，详情联系网站管理员");
 
     public static final ErrorCode DELETE_NON_EXIST_ID = ErrorCode.of(1, "不存在该用户");
 
@@ -29,4 +29,6 @@ public class UserError {
     public static final ErrorCode REGIST_NICKNAME_LENGTH = ErrorCode.of(9, "昵称长度不符合要求");
     public static final ErrorCode REGIST_NICKNAME_ALL_SPACE = ErrorCode.of(10, "昵称不能全为空格");
     public static final ErrorCode REGIST_EMAIL_INVALID = ErrorCode.of(11, "邮箱格式错误");
+
+
 }

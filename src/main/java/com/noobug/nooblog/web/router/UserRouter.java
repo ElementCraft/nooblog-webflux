@@ -4,6 +4,7 @@ import com.noobug.nooblog.consts.error.PublicError;
 import com.noobug.nooblog.consts.error.UserError;
 import com.noobug.nooblog.service.UserService;
 import com.noobug.nooblog.tools.entity.Result;
+import com.noobug.nooblog.web.dto.UserLoginDTO;
 import com.noobug.nooblog.web.dto.UserRegDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,15 @@ public class UserRouter {
      * @return 响应结果
      */
     private Mono<ServerResponse> login(ServerRequest request) {
-        return null;
+        Result err = Result.error(UserError.LOGIN_REQUIRE_IS_NULL);
+        String ip = request.headers().host().getHostString();
+
+        return request.bodyToMono(UserLoginDTO.class)
+                .filter(loginDTO -> loginDTO.getAccount() != null)
+                .filter(loginDTO -> loginDTO.getPassword() != null)
+                .flatMap(loginDTO -> userService.login(loginDTO, ip))
+                .flatMap(result -> ok().body(fromObject(result)))
+                .switchIfEmpty(badRequest().body(fromObject(err)));
     }
 
     /**
