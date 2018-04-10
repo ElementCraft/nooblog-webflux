@@ -9,17 +9,29 @@ import com.noobug.nooblog.repository.UserLogRepository;
 import com.noobug.nooblog.repository.UserRepository;
 import com.noobug.nooblog.repository.UserRoleRepository;
 import com.noobug.nooblog.tools.entity.Result;
+import com.noobug.nooblog.tools.utils.CommonUtil;
 import com.noobug.nooblog.tools.utils.SecurityUtil;
 import com.noobug.nooblog.tools.utils.ValidateUtil;
+import com.noobug.nooblog.web.dto.UserFixInfoDTO;
 import com.noobug.nooblog.web.dto.UserLoginDTO;
 import com.noobug.nooblog.web.dto.UserRegDTO;
 import com.noobug.nooblog.web.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
+
+import java.io.File;
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -52,25 +64,25 @@ public class UserService {
 
         // 注册参数合法性判断
         if (!ValidateUtil.lengthBetween(regDTO.getAccount(), 5, 18)) {
-            return Mono.just(Result.error(UserError.REGIST_ACCOUNT_LENGTH));
+            return Mono.just(Result.error(UserError.Reg.ACCOUNT_LENGTH));
         } else if (!ValidateUtil.lengthBetween(regDTO.getPassword(), 5, 18)) {
-            return Mono.just(Result.error(UserError.REGIST_PASSWORD_LENGTH));
+            return Mono.just(Result.error(UserError.Reg.PASSWORD_LENGTH));
         } else if (!ValidateUtil.lengthBetween(regDTO.getNickName(), 1, 18)) {
-            return Mono.just(Result.error(UserError.REGIST_NICKNAME_LENGTH));
+            return Mono.just(Result.error(UserError.Reg.NICKNAME_LENGTH));
         } else if (ValidateUtil.existChinese(regDTO.getAccount())) {
-            return Mono.just(Result.error(UserError.REGIST_ACCOUNT_EXIST_CHINESE));
+            return Mono.just(Result.error(UserError.Reg.ACCOUNT_EXIST_CHINESE));
         } else if (ValidateUtil.existSpace(regDTO.getAccount())) {
-            return Mono.just(Result.error(UserError.REGIST_ACCOUNT_EXIST_SPACE));
+            return Mono.just(Result.error(UserError.Reg.ACCOUNT_EXIST_SPACE));
         } else if (ValidateUtil.allNumber(regDTO.getAccount())) {
-            return Mono.just(Result.error(UserError.REGIST_ACCOUNT_ALL_NUMBER));
+            return Mono.just(Result.error(UserError.Reg.ACCOUNT_ALL_NUMBER));
         } else if (userRepository.findByAccountAndDeleted(regDTO.getAccount(), Boolean.FALSE).isPresent()) {
-            return Mono.just(Result.error(UserError.REGIST_EXISTED_ACCOUNT));
+            return Mono.just(Result.error(UserError.Reg.EXISTED_ACCOUNT));
         } else if (ValidateUtil.existSpace(regDTO.getPassword())) {
-            return Mono.just(Result.error(UserError.REGIST_PASSWORD_EXIST_SPACE));
+            return Mono.just(Result.error(UserError.Reg.PASSWORD_EXIST_SPACE));
         } else if (ValidateUtil.allSpace(regDTO.getNickName())) {
-            return Mono.just(Result.error(UserError.REGIST_NICKNAME_ALL_SPACE));
+            return Mono.just(Result.error(UserError.Reg.NICKNAME_ALL_SPACE));
         } else if (!ValidateUtil.isEmail(regDTO.getEmail())) {
-            return Mono.just(Result.error(UserError.REGIST_EMAIL_INVALID));
+            return Mono.just(Result.error(UserError.Reg.EMAIL_INVALID));
         }
 
         // 加密密码
@@ -89,7 +101,6 @@ public class UserService {
         // 设置为用户角色
         try {
             setDefaultRole(user);
-
 
         } catch (Exception e) {
             log.error("[新用户注册] 设置默认角色失败", e);
@@ -142,9 +153,73 @@ public class UserService {
                         return addUserLog(user, ip)
                                 .thenReturn(Result.ok());
                     } else {
-                        return Mono.just(Result.error(UserError.LOGIN_INCORRECT_PASSWORD));
+                        return Mono.just(Result.error(UserError.Login.INCORRECT_PASSWORD));
                     }
                 })
-                .orElse(Mono.just(Result.error(UserError.LOGIN_NOT_EXIST_ACCOUNT)));
+                .orElse(Mono.just(Result.error(UserError.Login.NOT_EXIST_ACCOUNT)));
+    }
+
+    /**
+     * 上传头像
+     *
+     * @param multiValueMap 表单信息
+     * @return 上传文件url
+     */
+    public Mono<Result<String>> uploadIcon(MultiValueMap<String, Part> multiValueMap) {
+        Map<String, Part> parts = multiValueMap.toSingleValueMap();
+        if (parts.containsKey("file")) {
+            FilePart part = (FilePart) parts.get("file");
+            String ext = StringUtils.getFilenameExtension(part.filename());
+
+            if (ext != null) {
+                ext = ext.toLowerCase();
+            }
+
+            if (!"jpg".equals(ext) && !"gif".equals(ext) && !"png".equals(ext) && !"bmp".equals(ext)) {
+                return Mono.just(Result.error(3, "不允许上传该格式的文件"));
+            }
+
+            String fileName = ZonedDateTime.now().toEpochSecond()
+                    + "_" + CommonUtil.randomString(6) + "." + ext;
+
+            String filePath = "upload" + File.separator + fileName;
+
+            // 目录
+            File dir = new File("upload");
+            if (!dir.exists()) {
+                dir.mkdir();
+            }
+
+            File file = new File(filePath);
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return part.transferTo(file).thenReturn(Result.ok(filePath));
+        }
+
+        return Mono.just(Result.error(1, "上传文件异常"));
+    }
+
+    /**
+     * 修改资料
+     *
+     * @param userFixInfoDTO 修改的字段DTO
+     * @return 处理结果
+     */
+    public Mono<Result<Object>> fixUserInfo(UserFixInfoDTO userFixInfoDTO) {
+        Integer sex = userFixInfoDTO.getSex();
+        Boolean isPublic = userFixInfoDTO.getIsPublic();
+        Optional<User> user = userRepository.findByIdAndDeleted(userFixInfoDTO.getId(), Boolean.FALSE);
+
+        // 判断传入参数的有效性
+        if (!user.isPresent()) {
+            return Mono.just(Result.error(UserError.NON_EXIST_ID));
+        }
+
+        return Mono.just(Result.ok());
     }
 }
