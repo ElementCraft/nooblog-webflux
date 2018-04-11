@@ -10,6 +10,7 @@ import com.noobug.nooblog.web.dto.UserRegDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -22,8 +23,7 @@ import static org.springframework.web.reactive.function.BodyInserters.fromObject
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.nest;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
-import static org.springframework.web.reactive.function.server.ServerResponse.badRequest;
-import static org.springframework.web.reactive.function.server.ServerResponse.ok;
+import static org.springframework.web.reactive.function.server.ServerResponse.*;
 
 @Slf4j
 @Component
@@ -70,7 +70,11 @@ public class UserRouter {
      * @return 结果
      */
     private Mono<ServerResponse> getUserInfo(ServerRequest request) {
-        return null;
+        Long id = Long.valueOf(request.pathVariable("id"));
+
+        return userService.getUserInfoById(id)
+                .flatMap(o -> ok().body(fromObject(o)))
+                .switchIfEmpty(status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
     /**

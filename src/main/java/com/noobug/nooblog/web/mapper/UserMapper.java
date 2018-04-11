@@ -1,6 +1,7 @@
 package com.noobug.nooblog.web.mapper;
 
 import com.noobug.nooblog.domain.User;
+import com.noobug.nooblog.web.dto.UserInfoDTO;
 import com.noobug.nooblog.web.dto.UserRegDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValueCheckStrategy;
@@ -10,5 +11,7 @@ public interface UserMapper {
 
     User regDTO2User(UserRegDTO regDTO);
 
-    UserRegDTO user2RegDTO(User user);
+    UserInfoDTO user2InfoDTO(User user);
+
+
 }

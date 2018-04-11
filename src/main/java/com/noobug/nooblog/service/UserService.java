@@ -13,6 +13,7 @@ import com.noobug.nooblog.tools.utils.CommonUtil;
 import com.noobug.nooblog.tools.utils.SecurityUtil;
 import com.noobug.nooblog.tools.utils.ValidateUtil;
 import com.noobug.nooblog.web.dto.UserFixInfoDTO;
+import com.noobug.nooblog.web.dto.UserInfoDTO;
 import com.noobug.nooblog.web.dto.UserLoginDTO;
 import com.noobug.nooblog.web.dto.UserRegDTO;
 import com.noobug.nooblog.web.mapper.UserMapper;
@@ -32,7 +33,6 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -226,15 +226,38 @@ public class UserService {
             return Mono.just(Result.error(UserError.Reg.NICKNAME_LENGTH));
         } else if (signature != null && signature.length() > UserConst.Limit.LEN_SIGNATURE_MAX) {
             return Mono.just(Result.error(UserError.Info.SIGNATURE_TOO_LONG));
-        } else if (!UserConst.Sex.ALL.contains(sex)){
+        } else if (!UserConst.Sex.ALL.contains(sex)) {
             return Mono.just(Result.error(UserError.Info.UNKNOWN_SEX_TYPE));
         } else {
             File file = new File(iconPath);
-            if(!file.exists()){
+            if (!file.exists()) {
                 return Mono.just(Result.error(UserError.Info.UNKNOWN_ICON_PATH));
+            } else {
+                User dbUser = user.get();
+                dbUser.setIsPublic(userFixInfoDTO.getIsPublic());
+                dbUser.setSex(sex);
+                dbUser.setSignature(signature);
+                dbUser.setNickName(nickName);
+                dbUser.setIconPath(iconPath);
+                userRepository.save(dbUser);
             }
         }
 
         return Mono.just(Result.ok());
+    }
+
+    /**
+     * 获取用户资料信息
+     *
+     * @param id 用户ID
+     * @return 用户资料DTO
+     */
+    public Mono<Result<UserInfoDTO>> getUserInfoById(Long id) {
+        return userRepository.findByIdAndDeleted(id, Boolean.FALSE)
+                .map(user -> {
+                    UserInfoDTO dto = userMapper.user2InfoDTO(user);
+                    return Mono.just(Result.ok(dto));
+                })
+                .orElse(Mono.just(Result.error(UserError.NON_EXIST_ID)));
     }
 }
