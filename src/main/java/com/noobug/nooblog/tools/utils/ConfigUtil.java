@@ -1,9 +1,12 @@
 package com.noobug.nooblog.tools.utils;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.noobug.nooblog.domain.SystemConfig;
+import com.noobug.nooblog.repository.SystemConfigRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,6 +18,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class ConfigUtil {
+
+    @Autowired
+    private SystemConfigRepository systemConfigRepository;
+
     private ConcurrentHashMap<String, String> mapConfig;
 
     public ConfigUtil() {
@@ -22,7 +29,19 @@ public class ConfigUtil {
     }
 
     /**
+     * 初始化读取数据库配置表
+     */
+    @PostConstruct
+    public void init() {
+        List<SystemConfig> configs = systemConfigRepository.getAllByDeleted(Boolean.FALSE);
+        for (SystemConfig config : configs) {
+            this.add(config.getKey(), config.getData());
+        }
+    }
+
+    /**
      * 获取配置值
+     *
      * @param k 配置名
      * @return 值
      */
@@ -32,7 +51,8 @@ public class ConfigUtil {
 
     /**
      * 获取配置值，带默认值
-     * @param k 配置名
+     *
+     * @param k            配置名
      * @param defaultValue 默认值
      * @return 值
      */
@@ -43,6 +63,7 @@ public class ConfigUtil {
 
     /**
      * 获取配置值 整型
+     *
      * @param k 配置名
      * @return 值
      */
@@ -54,7 +75,8 @@ public class ConfigUtil {
 
     /**
      * 获取配置值，带默认值，整型
-     * @param k 配置名
+     *
+     * @param k            配置名
      * @param defaultValue 默认值
      * @return 值
      */
@@ -65,6 +87,7 @@ public class ConfigUtil {
 
     /**
      * 获取配置值 浮点型
+     *
      * @param k 配置名
      * @return 值
      */
@@ -76,7 +99,8 @@ public class ConfigUtil {
 
     /**
      * 获取配置值，带默认值，浮点型
-     * @param k 配置名
+     *
+     * @param k            配置名
      * @param defaultValue 默认值
      * @return 值
      */
@@ -88,6 +112,7 @@ public class ConfigUtil {
 
     /**
      * 获取配置值 长整型
+     *
      * @param k 配置名
      * @return 值
      */
@@ -99,7 +124,8 @@ public class ConfigUtil {
 
     /**
      * 获取配置值，带默认值，长整型
-     * @param k 配置名
+     *
+     * @param k            配置名
      * @param defaultValue 默认值
      * @return 值
      */

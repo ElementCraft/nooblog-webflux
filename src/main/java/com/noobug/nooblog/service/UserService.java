@@ -8,6 +8,7 @@ import com.noobug.nooblog.domain.UserRole;
 import com.noobug.nooblog.repository.UserLogRepository;
 import com.noobug.nooblog.repository.UserRepository;
 import com.noobug.nooblog.repository.UserRoleRepository;
+import com.noobug.nooblog.security.TokenProvider;
 import com.noobug.nooblog.tools.entity.Result;
 import com.noobug.nooblog.tools.utils.CommonUtil;
 import com.noobug.nooblog.tools.utils.SecurityUtil;
@@ -31,6 +32,7 @@ import reactor.core.publisher.Mono;
 import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 
@@ -54,6 +56,8 @@ public class UserService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private TokenProvider tokenProvider;
 
     /**
      * 用户注册
@@ -146,13 +150,15 @@ public class UserService {
     public Mono<Result<Object>> login(UserLoginDTO loginDTO, String ip) {
         // 加密密码
         String md5 = SecurityUtil.md5(loginDTO.getPassword());
+        String account = loginDTO.getAccount();
 
-        return userRepository.findByAccountAndDeleted(loginDTO.getAccount(), Boolean.FALSE)
+        return userRepository.findByAccountAndDeleted(account, Boolean.FALSE)
                 .map(user -> {
                     if (user.getPassword().equals(md5)) {
+                        String token = tokenProvider.generateToken(account, md5, new ArrayList<>());
 
                         return addUserLog(user, ip)
-                                .thenReturn(Result.ok());
+                                .thenReturn(Result.ok((Object) token));
                     } else {
                         return Mono.just(Result.error(UserError.Login.INCORRECT_PASSWORD));
                     }
