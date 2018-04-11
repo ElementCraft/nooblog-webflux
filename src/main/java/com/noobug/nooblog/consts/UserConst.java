@@ -1,5 +1,9 @@
 package com.noobug.nooblog.consts;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public interface UserConst {
 
     /**
@@ -30,5 +34,18 @@ public interface UserConst {
          * 保密
          */
         int SECRET = 3;
+
+        List<Integer> ALL = Stream.of(UserConst.Sex.UNKNOWN, UserConst.Sex.FEMALE, UserConst.Sex.MALE, UserConst.Sex.SECRET)
+                .collect(Collectors.toList());
+    }
+
+    interface Limit {
+        int LEN_ACCOUNT_MIN = 5;
+        int LEN_ACCOUNT_MAX = 18;
+        int LEN_NICKNAME_MIN = 1;
+        int LEN_NICKNAME_MAX = 18;
+        int LEN_PASSWORD_MIN = 5;
+        int LEN_PASSWORD_MAX = 18;
+        int LEN_SIGNATURE_MAX = 64;
     }
 }

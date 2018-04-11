@@ -38,6 +38,13 @@ public interface UserError {
         ErrorCode EMAIL_INVALID = ErrorCode.of(11, "邮箱格式错误");
     }
 
+    interface Info {
+        ErrorCode SIGNATURE_TOO_LONG = ErrorCode.of(3, "签名长度超出限制");
+        ErrorCode UNKNOWN_SEX_TYPE = ErrorCode.of(4, "性别类型错误");
+        ErrorCode UNKNOWN_ICON_PATH = ErrorCode.of(5, "找不到该头像图片文件");
+
+    }
+
     /**
      * 用户栏目相关错误
      */

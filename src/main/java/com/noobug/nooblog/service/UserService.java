@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -63,11 +64,11 @@ public class UserService {
     public Mono<Result> reg(UserRegDTO regDTO) {
 
         // 注册参数合法性判断
-        if (!ValidateUtil.lengthBetween(regDTO.getAccount(), 5, 18)) {
+        if (!ValidateUtil.lengthBetween(regDTO.getAccount(), UserConst.Limit.LEN_ACCOUNT_MIN, UserConst.Limit.LEN_ACCOUNT_MAX)) {
             return Mono.just(Result.error(UserError.Reg.ACCOUNT_LENGTH));
-        } else if (!ValidateUtil.lengthBetween(regDTO.getPassword(), 5, 18)) {
+        } else if (!ValidateUtil.lengthBetween(regDTO.getPassword(), UserConst.Limit.LEN_PASSWORD_MIN, UserConst.Limit.LEN_PASSWORD_MAX)) {
             return Mono.just(Result.error(UserError.Reg.PASSWORD_LENGTH));
-        } else if (!ValidateUtil.lengthBetween(regDTO.getNickName(), 1, 18)) {
+        } else if (!ValidateUtil.lengthBetween(regDTO.getNickName(), UserConst.Limit.LEN_NICKNAME_MIN, UserConst.Limit.LEN_NICKNAME_MAX)) {
             return Mono.just(Result.error(UserError.Reg.NICKNAME_LENGTH));
         } else if (ValidateUtil.existChinese(regDTO.getAccount())) {
             return Mono.just(Result.error(UserError.Reg.ACCOUNT_EXIST_CHINESE));
@@ -212,12 +213,26 @@ public class UserService {
      */
     public Mono<Result<Object>> fixUserInfo(UserFixInfoDTO userFixInfoDTO) {
         Integer sex = userFixInfoDTO.getSex();
-        Boolean isPublic = userFixInfoDTO.getIsPublic();
+        String nickName = userFixInfoDTO.getNickName();
+        String signature = userFixInfoDTO.getSignature();
+        String iconPath = userFixInfoDTO.getIconPath();
+
         Optional<User> user = userRepository.findByIdAndDeleted(userFixInfoDTO.getId(), Boolean.FALSE);
 
         // 判断传入参数的有效性
         if (!user.isPresent()) {
             return Mono.just(Result.error(UserError.NON_EXIST_ID));
+        } else if (!ValidateUtil.lengthBetween(nickName, UserConst.Limit.LEN_NICKNAME_MIN, UserConst.Limit.LEN_NICKNAME_MAX)) {
+            return Mono.just(Result.error(UserError.Reg.NICKNAME_LENGTH));
+        } else if (signature != null && signature.length() > UserConst.Limit.LEN_SIGNATURE_MAX) {
+            return Mono.just(Result.error(UserError.Info.SIGNATURE_TOO_LONG));
+        } else if (!UserConst.Sex.ALL.contains(sex)){
+            return Mono.just(Result.error(UserError.Info.UNKNOWN_SEX_TYPE));
+        } else {
+            File file = new File(iconPath);
+            if(!file.exists()){
+                return Mono.just(Result.error(UserError.Info.UNKNOWN_ICON_PATH));
+            }
         }
 
         return Mono.just(Result.ok());
