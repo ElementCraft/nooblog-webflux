@@ -1,6 +1,7 @@
 package com.noobug.nooblog.config;
 
 import com.noobug.nooblog.security.AuthFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -16,16 +17,20 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @EnableWebFluxSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ReactiveSecurityConfig {
+    @Autowired
+    private AuthFilter authFilter;
+
+    @Autowired
+    private CorsConfig corsConfig;
+
     @Bean
-    SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, AuthFilter authFilter) {
+    SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
 
         http
                 .csrf().disable()
                 .authorizeExchange()
                 .anyExchange()
-                .permitAll()
-                .and()
-                .addFilterAt(authFilter, SecurityWebFiltersOrder.HTTP_BASIC);
+                .permitAll();
 
 
         return http.build();

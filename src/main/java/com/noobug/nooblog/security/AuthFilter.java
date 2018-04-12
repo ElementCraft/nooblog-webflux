@@ -39,7 +39,7 @@ public class AuthFilter implements WebFilter {
     @Autowired
     private ConfigUtil configUtil;
 
-    private ServerWebExchangeMatcher authMatcher = ServerWebExchangeMatchers.pathMatchers("/api/**");
+    private ServerWebExchangeMatcher authMatcher = ServerWebExchangeMatchers.pathMatchers("/api/user/reg");
     private ServerSecurityContextRepository securityContextRepository = NoOpServerSecurityContextRepository.getInstance();
 
     @Override
@@ -50,8 +50,8 @@ public class AuthFilter implements WebFilter {
         // 过滤不需要鉴权的地址 然后对需要鉴权的地址做jwt token转换， 然后验证。
         return authMatcher.matches(serverWebExchange)
                 .filter(ServerWebExchangeMatcher.MatchResult::isMatch)
+                .switchIfEmpty(webFilterChain.filter(serverWebExchange).then(Mono.empty()))
                 .flatMap(matchResult -> this.convert(serverWebExchange))
-                .switchIfEmpty(Mono.empty())
                 .flatMap(authentication -> this.auth(serverWebExchange, webFilterChain, authentication));
     }
 
