@@ -27,6 +27,11 @@ public class SystemConfig {
      */
     private String data;
 
+    /**
+     * 说明
+     */
+    private String brief;
+
     @Column(name = "is_deleted")
     private Boolean deleted;
 }

@@ -15,7 +15,7 @@
     <include file="classpath:/liquibase/changelog/2018040716410001-UserColumn.xml"/>
     <include file="classpath:/liquibase/changelog/2018040718150001-UserFavorite.xml"/>
     <include file="classpath:/liquibase/changelog/2018040718220001-ArticleLike.xml"/>
-
-
-
+    <include file="classpath:/liquibase/changelog/2018041818210001-Authority.xml"/>
+    <include file="classpath:/liquibase/changelog/2018041818350001-RoleAuthority.xml"/>
+    
 </databaseChangeLog>

@@ -3,6 +3,8 @@ package com.noobug.nooblog.security;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.SignedJWT;
+import com.noobug.nooblog.domain.User;
+import com.noobug.nooblog.repository.UserRepository;
 import com.noobug.nooblog.tools.utils.ConfigUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -25,8 +27,9 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,6 +41,9 @@ public class AuthFilter implements WebFilter {
 
     @Autowired
     private ConfigUtil configUtil;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private ServerWebExchangeMatcher authMatcher = ServerWebExchangeMatchers.pathMatchers("/api/user/reg");
     private ServerSecurityContextRepository securityContextRepository = NoOpServerSecurityContextRepository.getInstance();
@@ -59,6 +65,15 @@ public class AuthFilter implements WebFilter {
         SecurityContextImpl securityContext = new SecurityContextImpl();
         securityContext.setAuthentication(authentication);
 
+        String account = (String) authentication.getPrincipal();
+        String password = (String) authentication.getCredentials();
+
+
+        Optional<User> user = userRepository.findByAccountAndPasswordAndBannedAndDeleted(account, password, Boolean.FALSE, Boolean.FALSE);
+        if (!user.isPresent()) {
+            return Mono.empty();
+        }
+
         serverWebExchange.getResponse().setStatusCode(HttpStatus.OK);
         return this.securityContextRepository.save(serverWebExchange, securityContext)
                 .then(webFilterChain.filter(serverWebExchange))
@@ -78,6 +93,7 @@ public class AuthFilter implements WebFilter {
         SignedJWT signedJWT;
         String secret = configUtil.get(JwtConst.SECRET_KEY, JwtConst.SECRET);
         String subject;
+        String password;
         String auths;
         // 权限集合
         Collection<? extends GrantedAuthority> authorities;
@@ -86,12 +102,16 @@ public class AuthFilter implements WebFilter {
             signedJWT = SignedJWT.parse(credentials);
             signedJWT.verify(new MACVerifier(secret));
             subject = signedJWT.getJWTClaimsSet().getSubject();
-            auths = (String) signedJWT.getJWTClaimsSet().getClaim("auths");
+            auths = (String) signedJWT.getJWTClaimsSet().getClaim(JwtConst.AUTHORITIES_CLAIM_KEY);
+            password = (String) signedJWT.getJWTClaimsSet().getClaim(JwtConst.PASSWORD_CLAIM_KEY);
 
-            authorities = Stream.of(auths.split(","))
-                    .filter(str -> str != null && !str.isEmpty())
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(Collectors.toList());
+            authorities = Optional.ofNullable(auths)
+                    .map(o -> Stream.of(auths.split(JwtConst.AUTHORITIES_CLAIM_DELIMITER))
+                            .filter(str -> str != null && !str.isEmpty())
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList())
+                    )
+                    .orElse(new ArrayList<>());
 
         } catch (ParseException e) {
             return Mono.empty();
@@ -99,6 +119,6 @@ public class AuthFilter implements WebFilter {
             return Mono.empty();
         }
 
-        return Mono.just(new UsernamePasswordAuthenticationToken(subject, null, authorities));
+        return Mono.just(new UsernamePasswordAuthenticationToken(subject, password, authorities));
     }
 }

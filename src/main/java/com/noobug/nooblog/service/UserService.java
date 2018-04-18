@@ -2,6 +2,7 @@ package com.noobug.nooblog.service;
 
 import com.noobug.nooblog.consts.UserConst;
 import com.noobug.nooblog.consts.error.UserError;
+import com.noobug.nooblog.domain.Role;
 import com.noobug.nooblog.domain.User;
 import com.noobug.nooblog.domain.UserLog;
 import com.noobug.nooblog.domain.UserRole;
@@ -33,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -155,7 +157,9 @@ public class UserService {
         return userRepository.findByAccountAndDeleted(account, Boolean.FALSE)
                 .map(user -> {
                     if (user.getPassword().equals(md5)) {
-                        String token = tokenProvider.generateToken(account, md5, new ArrayList<>());
+                        List<Role> roles = roleService.findAllByUserId(user.getId());
+
+                        String token = tokenProvider.generateToken(account, md5, roles);
 
                         return addUserLog(user, ip)
                                 .thenReturn(Result.ok((Object) token));

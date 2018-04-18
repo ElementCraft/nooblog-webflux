@@ -8,31 +8,29 @@ import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
 
+/**
+ * 接口权限表
+ */
 @Entity
-@Table(name = "role")
+@Table(name = "authority")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Role extends BasePojo implements GrantedAuthority {
+public class Authority extends BasePojo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * 角色code
-     */
+    private String name;
+
     private String code;
 
-    /**
-     * 角色名称
-     */
-    private String name;
+    private String url;
+
+    private Integer method;
+
+    private Integer sortLevel;
 
     @Column(name = "is_deleted")
     private Boolean deleted;
-
-    @Override
-    public String getAuthority() {
-        return code;
-    }
 }

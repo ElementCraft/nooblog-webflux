@@ -3,7 +3,6 @@ package com.noobug.nooblog.security;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.KeyLengthException;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
@@ -33,7 +32,11 @@ public class TokenProvider {
                 .subject(subject)
                 .issuer("noobug.com")
                 .expirationTime(new Date(System.currentTimeMillis() + 60 * 1000))
-                .claim("auths", authorities.parallelStream().map(auth -> (GrantedAuthority) auth).map(a -> a.getAuthority()).collect(Collectors.joining(",")))
+                .claim(JwtConst.AUTHORITIES_CLAIM_KEY, authorities.parallelStream()
+                        .map(auth -> (GrantedAuthority) auth)
+                        .map(a -> a.getAuthority())
+                        .collect(Collectors.joining(JwtConst.AUTHORITIES_CLAIM_DELIMITER)))
+                .claim(JwtConst.PASSWORD_CLAIM_KEY, credentials)
                 .build();
 
         SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claimsSet);

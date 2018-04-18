@@ -21,4 +21,10 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="201804181820" author="ElementCraft">
+        <addColumn tableName="system_config">
+            <column name="brief" type="varchar(128)" />
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
