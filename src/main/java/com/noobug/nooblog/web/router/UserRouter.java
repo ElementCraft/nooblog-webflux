@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -59,14 +57,16 @@ public class UserRouter {
     private Mono<ServerResponse> fixUserInfo(ServerRequest request) {
         Result err = Result.error(PublicError.REQUEST_BODY_PARAM_NULL);
 
-        return request.bodyToMono(UserFixInfoDTO.class)
-                .filter(dto -> dto.getSex() != null)
-                .filter(dto -> dto.getId() != null)
-                .filter(dto -> dto.getIsPublic() != null)
-                .filter(dto -> dto.getNickName() != null)
-                .flatMap(userService::fixUserInfo)
-                .flatMap(result -> ok().body(fromObject(result)))
-                .switchIfEmpty(badRequest().body(fromObject(err)));
+        return securityUtil.getCurrentUser()
+                .flatMap(authentication -> request.bodyToMono(UserFixInfoDTO.class)
+                        .filter(dto -> dto.getSex() != null)
+                        .filter(dto -> dto.getIsPublic() != null)
+                        .filter(dto -> dto.getNickName() != null)
+                        .flatMap(dto -> userService.fixUserInfo(authentication.getPrincipal().toString(), dto))
+                        .flatMap(result -> ok().body(fromObject(result)))
+                        .switchIfEmpty(badRequest().body(fromObject(err)))
+                ).switchIfEmpty(status(HttpStatus.UNAUTHORIZED).build());
+
     }
 
     /**

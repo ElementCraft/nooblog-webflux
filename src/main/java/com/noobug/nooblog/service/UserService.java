@@ -220,16 +220,17 @@ public class UserService {
     /**
      * 修改资料
      *
+     * @param account        用户账号
      * @param userFixInfoDTO 修改的字段DTO
      * @return 处理结果
      */
-    public Mono<Result<Object>> fixUserInfo(UserFixInfoDTO userFixInfoDTO) {
+    public Mono<Result<Object>> fixUserInfo(String account, UserFixInfoDTO userFixInfoDTO) {
         Integer sex = userFixInfoDTO.getSex();
         String nickName = userFixInfoDTO.getNickName();
         String signature = userFixInfoDTO.getSignature();
         String iconPath = userFixInfoDTO.getIconPath();
 
-        Optional<User> user = userRepository.findByIdAndDeleted(userFixInfoDTO.getId(), Boolean.FALSE);
+        Optional<User> user = userRepository.findByAccountAndDeleted(account, Boolean.FALSE);
 
         // 判断传入参数的有效性
         if (!user.isPresent()) {

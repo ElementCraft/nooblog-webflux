@@ -47,6 +47,11 @@ public class Comment extends BasePojo {
     private Integer badNumber;
 
     /**
+     * 回复数
+     */
+    private Integer commentNumber;
+
+    /**
      * 是否markdown
      */
     private Boolean isMarkdown;

@@ -18,8 +18,6 @@ import javax.persistence.Id;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserFixInfoDTO {
 
-    private Long id;
-
     /**
      * 昵称
      */
