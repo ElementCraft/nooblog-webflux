@@ -9,7 +9,7 @@ import com.noobug.nooblog.tools.entity.ErrorCode;
  */
 public interface UserError {
 
-    ErrorCode NON_EXIST_ID = ErrorCode.of(1, "不存在该用户");
+    ErrorCode NON_EXIST_ID = ErrorCode.of(-1, "不存在该用户");
 
     /**
      * 登录相关错误

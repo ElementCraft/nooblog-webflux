@@ -14,12 +14,13 @@ import javax.persistence.*;
 public class SystemConfig {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
      * 配置项key
      */
+    @Column(name = "`key`")
     private String key;
 
     /**
