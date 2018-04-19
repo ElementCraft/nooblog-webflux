@@ -77,7 +77,8 @@ public class AuthFilter implements WebFilter {
         serverWebExchange.getResponse().setStatusCode(HttpStatus.OK);
         return this.securityContextRepository.save(serverWebExchange, securityContext)
                 .then(webFilterChain.filter(serverWebExchange))
-                .subscriberContext(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
+                .subscriberContext(ReactiveSecurityContextHolder.withAuthentication(authentication));
+
     }
 
     private Mono<Authentication> convert(ServerWebExchange serverWebExchange) {

@@ -33,7 +33,6 @@ import reactor.core.publisher.Mono;
 import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,6 +59,9 @@ public class UserService {
 
     @Autowired
     private TokenProvider tokenProvider;
+
+    @Autowired
+    private SecurityUtil securityUtil;
 
     /**
      * 用户注册
@@ -93,7 +95,7 @@ public class UserService {
         }
 
         // 加密密码
-        String md5 = SecurityUtil.md5(regDTO.getPassword());
+        String md5 = securityUtil.md5(regDTO.getPassword());
         regDTO.setPassword(md5);
 
         User user = userMapper.regDTO2User(regDTO);
@@ -151,7 +153,7 @@ public class UserService {
      */
     public Mono<Result<Object>> login(UserLoginDTO loginDTO, String ip) {
         // 加密密码
-        String md5 = SecurityUtil.md5(loginDTO.getPassword());
+        String md5 = securityUtil.md5(loginDTO.getPassword());
         String account = loginDTO.getAccount();
 
         return userRepository.findByAccountAndDeleted(account, Boolean.FALSE)

@@ -4,6 +4,7 @@ import com.noobug.nooblog.consts.error.PublicError;
 import com.noobug.nooblog.consts.error.UserError;
 import com.noobug.nooblog.service.UserService;
 import com.noobug.nooblog.tools.entity.Result;
+import com.noobug.nooblog.tools.utils.SecurityUtil;
 import com.noobug.nooblog.web.dto.UserFixInfoDTO;
 import com.noobug.nooblog.web.dto.UserLoginDTO;
 import com.noobug.nooblog.web.dto.UserRegDTO;
@@ -12,12 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.server.*;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.web.reactive.function.BodyExtractors.toMultipartData;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
@@ -31,6 +34,9 @@ public class UserRouter {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private SecurityUtil securityUtil;
 
     @Bean
     RouterFunction<?> userRoutes() {
@@ -114,14 +120,18 @@ public class UserRouter {
     private Mono<ServerResponse> reg(ServerRequest request) {
         Result err = Result.error(UserError.Reg.REQUIRE_IS_NULL);
 
-        return request.bodyToMono(UserRegDTO.class)
-                .filter(regDTO -> regDTO.getAccount() != null)
-                .filter(regDTO -> regDTO.getPassword() != null)
-                .filter(regDTO -> regDTO.getEmail() != null)
-                .filter(regDTO -> regDTO.getNickName() != null)
-                .flatMap(userService::reg)
-                .flatMap(result -> ok().body(fromObject(result)))
-                .switchIfEmpty(badRequest().body(fromObject(err)));
+        return securityUtil.getCurrentUser().flatMap(authentication -> {
+
+            return request.bodyToMono(UserRegDTO.class)
+                    .filter(regDTO -> regDTO.getAccount() != null)
+                    .filter(regDTO -> regDTO.getPassword() != null)
+                    .filter(regDTO -> regDTO.getEmail() != null)
+                    .filter(regDTO -> regDTO.getNickName() != null)
+                    .flatMap(userService::reg)
+                    .flatMap(result -> ok().body(fromObject(result)))
+                    .switchIfEmpty(badRequest().body(fromObject(err)));
+        });
+
 
     }
 
