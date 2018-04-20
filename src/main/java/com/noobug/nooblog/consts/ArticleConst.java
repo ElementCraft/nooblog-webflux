@@ -1,33 +1,59 @@
 package com.noobug.nooblog.consts;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public interface ArticleConst {
 
     /**
      * 文章状态
      */
     interface Status {
-        // 正常
-        int ARTICLE_STATUS_NORMAL = 1;
+        /**
+         * 正常
+         */
+        int NORMAL = 1;
 
-        // 封禁
-        int ARTICLE_STATUS_BANNED = 2;
+        /**
+         * 封禁
+         */
+        int BANNED = 2;
 
-        // 删除
-        int ARTICLE_STATUS_DELETED = 3;
+        /**
+         * 删除
+         */
+        int DELETED = 3;
     }
 
     /**
      * 文章类型
      */
     interface Type {
-        // 原创
-        int ARTICLE_TYPE_OWN = 1;
+        /**
+         * 原创
+         */
+        int OWN = 1;
 
-        // 转载
-        int ARTICLE_TYPE_REPRINT = 2;
+        /**
+         * 转载
+         */
+        int REPRINT = 2;
 
-        // 翻译
-        int ARTICLE_TYPE_TRANSLATE = 3;
+        /**
+         * 翻译
+         */
+        int TRANSLATE = 3;
+
+        List<Integer> ALL = Stream.of(OWN, REPRINT, TRANSLATE)
+                .collect(Collectors.toList());
     }
 
+    interface Limit {
+        int LEN_TITLE_MIN = 1;
+        int LEN_TITLE_MAX = 128;
+        int LEN_LABEL_MAX = 128;
+        int LEN_REPRINT_URL_MAX = 128;
+        int LEN_TRANSLATE_URL_MAX = 128;
+    }
 }

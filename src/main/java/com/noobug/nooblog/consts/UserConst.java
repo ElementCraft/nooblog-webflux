@@ -35,7 +35,7 @@ public interface UserConst {
          */
         int SECRET = 3;
 
-        List<Integer> ALL = Stream.of(UserConst.Sex.UNKNOWN, UserConst.Sex.FEMALE, UserConst.Sex.MALE, UserConst.Sex.SECRET)
+        List<Integer> ALL = Stream.of(UNKNOWN, FEMALE, MALE, SECRET)
                 .collect(Collectors.toList());
     }
 

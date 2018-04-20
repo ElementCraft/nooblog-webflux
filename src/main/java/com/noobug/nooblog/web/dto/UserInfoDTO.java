@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.time.ZonedDateTime;
 
 /**
  * 用户个人资料DTO
@@ -40,4 +41,5 @@ public class UserInfoDTO {
 
     private Boolean isPublic;
 
+    private ZonedDateTime gmtCreate;
 }

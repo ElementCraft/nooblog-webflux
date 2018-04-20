@@ -2,10 +2,8 @@ package com.noobug.nooblog.service;
 
 import com.noobug.nooblog.consts.UserConst;
 import com.noobug.nooblog.consts.error.UserError;
-import com.noobug.nooblog.domain.Role;
-import com.noobug.nooblog.domain.User;
-import com.noobug.nooblog.domain.UserLog;
-import com.noobug.nooblog.domain.UserRole;
+import com.noobug.nooblog.domain.*;
+import com.noobug.nooblog.repository.UserColumnRepository;
 import com.noobug.nooblog.repository.UserLogRepository;
 import com.noobug.nooblog.repository.UserRepository;
 import com.noobug.nooblog.repository.UserRoleRepository;
@@ -53,6 +51,9 @@ public class UserService {
 
     @Autowired
     private UserRoleRepository userRoleRepository;
+
+    @Autowired
+    private UserColumnRepository userColumnRepository;
 
     @Autowired
     private UserMapper userMapper;
@@ -265,6 +266,7 @@ public class UserService {
      * @param id 用户ID
      * @return 用户资料DTO
      */
+    @Transactional(readOnly = true)
     public Mono<Result<UserInfoDTO>> getUserInfoById(Long id) {
         return userRepository.findByIdAndDeleted(id, Boolean.FALSE)
                 .map(user -> {
@@ -272,5 +274,37 @@ public class UserService {
                     return Mono.just(Result.ok(dto));
                 })
                 .orElse(Mono.just(Result.error(UserError.NON_EXIST_ID)));
+    }
+
+    /**
+     * 根据ID获取用户栏目
+     *
+     * @param columnId 栏目ID
+     * @return 用户栏目
+     */
+    @Transactional(readOnly = true)
+    public Optional<UserColumn> getColumnById(Long columnId) {
+        return userColumnRepository.findById(columnId);
+    }
+
+    /**
+     * 获取默认用户栏目，没有则新增
+     *
+     * @param account 用户账号
+     * @return 用户栏目
+     */
+    public UserColumn getOrAddDefaultColumnByAccount(String account) {
+
+        return userRepository.findByAccountAndDeleted(account, Boolean.FALSE)
+                .map(user -> {
+                    UserColumn column = userColumnRepository.findOneByUserAccountAndIsDefault(account, Boolean.TRUE);
+
+                    if (column == null) {
+                        column = new UserColumn(null, user, null, "默认栏目", 0, Boolean.TRUE);
+                        column = userColumnRepository.save(column);
+                    }
+
+                    return column;
+                }).orElse(null);
     }
 }

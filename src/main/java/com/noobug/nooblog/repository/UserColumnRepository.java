@@ -9,6 +9,8 @@ public interface UserColumnRepository extends JpaRepository<UserColumn, Long> {
 
     UserColumn findOneByUserIdAndIsDefault(Long id, Boolean isDefault);
 
+    UserColumn findOneByUserAccountAndIsDefault(String account, Boolean isDefault);
+
     List<UserColumn> findAllByUser_IdAndIsDefaultAndParentIdIsNullOrParentId(long id, Boolean isDefault, long parentId);
 
     List<UserColumn> findAllByParentIdAndIsDefault(Long id, Boolean isDefault);

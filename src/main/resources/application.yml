@@ -3,6 +3,8 @@ spring:
     active: #spring.profiles.active#
   jackson:
     time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: true
   jpa:
     open-in-view: false
   liquibase:

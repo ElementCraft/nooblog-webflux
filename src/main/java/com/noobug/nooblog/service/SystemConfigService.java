@@ -7,6 +7,7 @@ import com.noobug.nooblog.repository.SystemConfigRepository;
 import com.noobug.nooblog.tools.entity.Result;
 import com.noobug.nooblog.tools.utils.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,8 +62,9 @@ public class SystemConfigService {
      * @param pageable 分页参数
      * @return 分页结果
      */
-    public Mono<List<SystemConfig>> getAllByPage(Pageable pageable) {
-        List<SystemConfig> configs = systemConfigRepository.findAllByDeleted(Boolean.FALSE, pageable);
+    @Transactional(readOnly = true)
+    public Mono<Page<SystemConfig>> getAllByPage(Pageable pageable) {
+        Page<SystemConfig> configs = systemConfigRepository.findAllByDeleted(Boolean.FALSE, pageable);
         return Mono.just(configs);
     }
 
@@ -110,6 +112,7 @@ public class SystemConfigService {
     }
 
     // TODO 重新加载配置项的逻辑
+    @Transactional(readOnly = true)
     public Mono<Void> reload() {
         return Mono.empty();
     }
