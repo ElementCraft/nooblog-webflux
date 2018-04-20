@@ -27,4 +27,16 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="201804201902" author="ElementCraft">
+        <createIndex tableName="article_like" indexName="index_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="article_like" indexName="index_article_id">
+            <column name="article_id"/>
+        </createIndex>
+        <createIndex tableName="article_like" indexName="index_ip">
+            <column name="like_ip"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

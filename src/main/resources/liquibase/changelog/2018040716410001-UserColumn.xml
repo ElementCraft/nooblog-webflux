@@ -25,4 +25,9 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="201804201904" author="ElementCraft">
+        <createIndex tableName="user_column" indexName="index_user_id">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

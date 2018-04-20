@@ -46,4 +46,10 @@
         <dropColumn tableName="article" columnName="is_deleted" />
     </changeSet>
 
+    <changeSet id="201804201907" author="ElementCraft">
+        <createIndex tableName="article" indexName="index_title">
+            <column name="title"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

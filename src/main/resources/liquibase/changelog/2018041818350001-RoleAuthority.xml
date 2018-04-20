@@ -25,4 +25,13 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="201804201901" author="ElementCraft">
+        <createIndex tableName="role_authority" indexName="index_role_id">
+            <column name="role_id"/>
+        </createIndex>
+        <createIndex tableName="role_authority" indexName="index_authority_id">
+            <column name="authority_id"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

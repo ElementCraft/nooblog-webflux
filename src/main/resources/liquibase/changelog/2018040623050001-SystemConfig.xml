@@ -27,4 +27,11 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="201804201908" author="ElementCraft">
+        <createIndex tableName="system_config" indexName="index_key">
+            <column name="key"/>
+            <column name="is_deleted"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>
