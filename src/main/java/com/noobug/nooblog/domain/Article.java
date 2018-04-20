@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.ZonedDateTime;
 
 @Data
 @NoArgsConstructor
@@ -92,6 +93,11 @@ public class Article extends BasePojo {
      * 是否markdown
      */
     private Boolean isMarkdown;
+
+    /**
+     * 最后编辑时间
+     */
+    private ZonedDateTime lastEditTime;
 
     /**
      * 正文

@@ -96,7 +96,10 @@ public class ArticleListDTO {
      */
     private Boolean isMarkdown;
 
-    private ZonedDateTime gmtCreate;
+    /**
+     * 最后编辑时间
+     */
+    private ZonedDateTime lastEditTime;
 
-    private ZonedDateTime gmtModified;
+    private ZonedDateTime gmtCreate;
 }

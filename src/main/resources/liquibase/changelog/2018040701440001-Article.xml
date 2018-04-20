@@ -39,4 +39,11 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="201804201859" author="ElementCraft">
+        <addColumn tableName="article">
+            <column name="last_edit_time" type="datetime" defaultValueDate="now()" afterColumn="is_markdown" />
+        </addColumn>
+        <dropColumn tableName="article" columnName="is_deleted" />
+    </changeSet>
+
 </databaseChangeLog>
