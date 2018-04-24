@@ -186,4 +186,15 @@ public class ArticleService {
 
 
     }
+
+    public  Mono<Result<Object>> doRemark(Long arrticleId){
+        return articleRepository.findById(arrticleId)
+                .map(article -> {
+                    article.setGoodNumber(article.getGoodNumber()+1);
+                    articleRepository.save(article);
+                    return Mono.just(Result.ok());
+                }).orElse(Mono.just(Result.error(ArticleError.NON_EXIST_ID)));
+    }
+
+
 }

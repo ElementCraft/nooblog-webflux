@@ -2,6 +2,7 @@ package com.noobug.nooblog.web.router;
 
 import com.noobug.nooblog.consts.error.PublicError;
 import com.noobug.nooblog.consts.error.UserError;
+import com.noobug.nooblog.service.ArticleService;
 import com.noobug.nooblog.service.UserService;
 import com.noobug.nooblog.tools.entity.Result;
 import com.noobug.nooblog.tools.utils.SecurityUtil;
@@ -34,6 +35,9 @@ public class UserRouter {
     private UserService userService;
 
     @Autowired
+    private ArticleService articleService;
+
+    @Autowired
     private SecurityUtil securityUtil;
 
     @Bean
@@ -45,6 +49,7 @@ public class UserRouter {
                         .andRoute(POST("/auth/info/{id}"), this::addAuthInfo)
                         .andRoute(GET("/info/{id}"), this::getUserInfo)
                         .andRoute(POST("/info"), this::fixUserInfo)
+
         );
     }
 
@@ -148,4 +153,7 @@ public class UserRouter {
                 .flatMap(o -> ok().body(fromObject(o)))
                 .switchIfEmpty(badRequest().build());
     }
+
+
+
 }
