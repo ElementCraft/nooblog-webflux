@@ -1,5 +1,6 @@
 package com.noobug.nooblog.web.router;
 
+import com.noobug.nooblog.consts.PublicConst;
 import com.noobug.nooblog.consts.error.PublicError;
 import com.noobug.nooblog.consts.error.UserError;
 import com.noobug.nooblog.service.UserService;
@@ -11,6 +12,7 @@ import com.noobug.nooblog.web.dto.UserRegDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -18,6 +20,8 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
 
 import static org.springframework.web.reactive.function.BodyExtractors.toMultipartData;
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
@@ -45,7 +49,39 @@ public class UserRouter {
                         .andRoute(POST("/auth/info/{id}"), this::addAuthInfo)
                         .andRoute(GET("/info/{id}"), this::getUserInfo)
                         .andRoute(POST("/info"), this::fixUserInfo)
+                        .andRoute(GET("/logs"), this::logs)
+                        .andRoute(POST("/article/unlike"), this::unlikeArticle)
         );
+    }
+
+    /**
+     * @param request
+     * @return
+     */
+    private Mono<ServerResponse> unlikeArticle(ServerRequest request) {
+
+        return request.queryParam("id")
+                .map(id -> {
+                    Long articleId = Long.valueOf(id);
+
+                    return securityUtil.getCurrentUser()
+                            .flatMap(authentication -> {
+                                return userService.unlikeArticle(authentication.getPrincipal().toString(), articleId)
+                                        .flatMap(result -> ok().body(fromObject(result)))
+                                        .switchIfEmpty(status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                            })
+                            .switchIfEmpty(status(HttpStatus.UNAUTHORIZED).build());
+                })
+                .orElse(badRequest().build());
+    }
+
+
+    private Mono<ServerResponse> logs(ServerRequest request) {
+        Integer page = Integer.valueOf(request.queryParam("page").orElse("0"));
+        Integer size = Integer.valueOf(request.queryParam("size").orElse(PublicConst.PAGE_SIZE.toString()));
+        return userService.getLogPage(PageRequest.of(page, size))
+                .flatMap(articles -> ok().body(fromObject(articles)))
+                .switchIfEmpty(ok().body(fromObject(new ArrayList<>())));
     }
 
     /**
@@ -120,19 +156,15 @@ public class UserRouter {
     private Mono<ServerResponse> reg(ServerRequest request) {
         Result err = Result.error(UserError.Reg.REQUIRE_IS_NULL);
 
-        return securityUtil.getCurrentUser().flatMap(authentication -> {
-
-            return request.bodyToMono(UserRegDTO.class)
-                    .filter(regDTO -> regDTO.getAccount() != null)
-                    .filter(regDTO -> regDTO.getPassword() != null)
-                    .filter(regDTO -> regDTO.getEmail() != null)
-                    .filter(regDTO -> regDTO.getNickName() != null)
-                    .flatMap(userService::reg)
-                    .flatMap(result -> ok().body(fromObject(result)))
-                    .switchIfEmpty(badRequest().body(fromObject(err)));
-        });
-
-
+        return securityUtil.getCurrentUser()
+                .flatMap(authentication -> request.bodyToMono(UserRegDTO.class)
+                        .filter(regDTO -> regDTO.getAccount() != null)
+                        .filter(regDTO -> regDTO.getPassword() != null)
+                        .filter(regDTO -> regDTO.getEmail() != null)
+                        .filter(regDTO -> regDTO.getNickName() != null)
+                        .flatMap(userService::reg)
+                        .flatMap(result -> ok().body(fromObject(result)))
+                        .switchIfEmpty(badRequest().body(fromObject(err))));
     }
 
     /**
