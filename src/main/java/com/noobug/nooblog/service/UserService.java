@@ -325,7 +325,7 @@ public class UserService {
      * @param articleId 文章ID
      * @return 结果
      */
-    public Mono<Result<Object>> unlikeArticle(String account, Long articleId) {
+    public Mono<Result<Object>> unlikeArticle(String account, Long articleId, String ip) {
 
         // 查用户，无则返回error
         return userRepository.findByAccountAndDeleted(account, Boolean.FALSE)

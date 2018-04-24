@@ -55,18 +55,23 @@ public class UserRouter {
     }
 
     /**
-     * @param request
-     * @return
+     * 用户对文章进行差评
+     *
+     * @param request 请求
+     * @return 响应
      */
     private Mono<ServerResponse> unlikeArticle(ServerRequest request) {
+        // 获取请求来源方地址
+        String ip = request.headers().host().getHostString();
 
+        // 取URL参数，有进行处理 无返回400
         return request.queryParam("id")
                 .map(id -> {
                     Long articleId = Long.valueOf(id);
 
                     return securityUtil.getCurrentUser()
                             .flatMap(authentication -> {
-                                return userService.unlikeArticle(authentication.getPrincipal().toString(), articleId)
+                                return userService.unlikeArticle(authentication.getPrincipal().toString(), articleId, ip)
                                         .flatMap(result -> ok().body(fromObject(result)))
                                         .switchIfEmpty(status(HttpStatus.INTERNAL_SERVER_ERROR).build());
                             })
