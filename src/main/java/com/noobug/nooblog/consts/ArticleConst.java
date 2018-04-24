@@ -6,6 +6,18 @@ import java.util.stream.Stream;
 
 public interface ArticleConst {
 
+    interface Like {
+        /**
+         * 点赞
+         */
+        int GOOD = 1;
+
+        /**
+         * 差评
+         */
+        int BAD = 2;
+    }
+
     /**
      * 文章状态
      */

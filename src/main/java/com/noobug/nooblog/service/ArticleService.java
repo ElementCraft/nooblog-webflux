@@ -3,7 +3,9 @@ package com.noobug.nooblog.service;
 import com.noobug.nooblog.consts.ArticleConst;
 import com.noobug.nooblog.consts.error.ArticleError;
 import com.noobug.nooblog.domain.Article;
+import com.noobug.nooblog.domain.ArticleLike;
 import com.noobug.nooblog.domain.UserColumn;
+import com.noobug.nooblog.repository.ArticleLikeRepository;
 import com.noobug.nooblog.repository.ArticleRepository;
 import com.noobug.nooblog.tools.entity.Result;
 import com.noobug.nooblog.tools.utils.ValidateUtil;
@@ -35,6 +37,9 @@ public class ArticleService {
 
     @Autowired
     private ArticleRepository articleRepository;
+
+    @Autowired
+    private ArticleLikeRepository articleLikeRepository;
 
     @Autowired
     private ArticleMapper articleMapper;
@@ -185,6 +190,47 @@ public class ArticleService {
         }
 
 
+    }
+
+    /**
+     * 根据ID查询文章（不包含已被删除文章）
+     *
+     * @param articleId
+     * @return
+     */
+    public Optional<Article> getById(Long articleId) {
+        return articleRepository.findByIdAndStatusNot(articleId, ArticleConst.Status.DELETED);
+    }
+
+    /**
+     * 找出用户对指定文章的点赞/差评记录
+     *
+     * @param userId    用户ID
+     * @param articleId 文章ID
+     * @return
+     */
+    public Optional<ArticleLike> getUserArticleLike(Long userId, Long articleId) {
+        return articleLikeRepository.findOneByUserIdAndArticleId(userId, articleId);
+    }
+
+    /**
+     * save文章实体
+     *
+     * @param article 文章实体
+     * @return
+     */
+    public Article saveArticle(Article article) {
+        return articleRepository.save(article);
+    }
+
+    /**
+     * save 点赞记录
+     *
+     * @param articleLike 点赞记录实体
+     * @return
+     */
+    public ArticleLike saveArticleLike(ArticleLike articleLike) {
+        return articleLikeRepository.save(articleLike);
     }
 
     public  Mono<Result<Object>> doRemark(Long arrticleId){

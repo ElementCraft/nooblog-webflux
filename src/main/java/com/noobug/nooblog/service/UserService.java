@@ -1,6 +1,8 @@
 package com.noobug.nooblog.service;
 
+import com.noobug.nooblog.consts.ArticleConst;
 import com.noobug.nooblog.consts.UserConst;
+import com.noobug.nooblog.consts.error.ArticleError;
 import com.noobug.nooblog.consts.error.UserError;
 import com.noobug.nooblog.domain.*;
 import com.noobug.nooblog.repository.UserColumnRepository;
@@ -19,6 +21,7 @@ import com.noobug.nooblog.web.dto.UserRegDTO;
 import com.noobug.nooblog.web.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.stereotype.Service;
@@ -42,6 +45,9 @@ public class UserService {
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private ArticleService articleService;
 
     @Autowired
     private UserRepository userRepository;
@@ -308,5 +314,51 @@ public class UserService {
                 }).orElse(null);
     }
 
+    public Mono<List<UserLog>> getLogPage(Pageable pageable) {
 
+        return Mono.empty();
+    }
+
+    /**
+     * 用户给文章差评
+     *
+     * @param account   用户账号
+     * @param articleId 文章ID
+     * @return 结果
+     */
+    public Mono<Result<Object>> unlikeArticle(String account, Long articleId, String ip) {
+
+        // 查用户，无则返回error
+        return userRepository.findByAccountAndDeleted(account, Boolean.FALSE)
+                // 查文章 无则error
+                .map(u -> articleService.getById(articleId)
+                        .map(article -> {
+                            // 找用户点赞该文章的记录
+                            Optional<ArticleLike> articleLike = articleService.getUserArticleLike(u.getId(), articleId);
+
+                            // 有记录则更新成差评  否则新增记录
+                            if(articleLike.isPresent()){
+                                ArticleLike dbLike = articleLike.get();
+                                if(ArticleConst.Like.GOOD == dbLike.getStatus()){
+                                    dbLike.setStatus(ArticleConst.Like.BAD);
+                                    articleService.saveArticleLike(dbLike);
+                                    // 文章点赞数-1 差评数+1
+                                    article.setGoodNumber(article.getGoodNumber() - 1);
+                                    article.setBadNumber(article.getBadNumber() + 1);
+                                }
+                            }else{
+                                ArticleLike newLike = new ArticleLike(null, u, article, ArticleConst.Like.BAD);
+                                articleService.saveArticleLike(newLike);
+                                // 文章差评数+1
+                                article.setBadNumber(article.getBadNumber() + 1);
+                            }
+
+                            // 更新文章信息
+
+                            article = articleService.saveArticle(article);
+                            return Mono.just(Result.ok());
+                        })
+                        .orElse(Mono.just(Result.error(ArticleError.NON_EXIST_ID)))
+                ).orElse(Mono.just(Result.error(UserError.NON_EXIST_ID)));
+    }
 }
