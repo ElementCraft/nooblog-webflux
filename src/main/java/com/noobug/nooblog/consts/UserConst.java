@@ -47,5 +47,6 @@ public interface UserConst {
         int LEN_PASSWORD_MIN = 5;
         int LEN_PASSWORD_MAX = 18;
         int LEN_SIGNATURE_MAX = 64;
+        int LEN_COLUMN_TITLE_MAX = 12;
     }
 }

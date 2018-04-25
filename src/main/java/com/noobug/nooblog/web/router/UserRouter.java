@@ -7,6 +7,7 @@ import com.noobug.nooblog.service.ArticleService;
 import com.noobug.nooblog.service.UserService;
 import com.noobug.nooblog.tools.entity.Result;
 import com.noobug.nooblog.tools.utils.SecurityUtil;
+import com.noobug.nooblog.web.dto.AddUserColumnDTO;
 import com.noobug.nooblog.web.dto.UserFixInfoDTO;
 import com.noobug.nooblog.web.dto.UserLoginDTO;
 import com.noobug.nooblog.web.dto.UserRegDTO;
@@ -56,7 +57,29 @@ public class UserRouter {
                         .andRoute(GET("/logs"), this::logs)
                         .andRoute(POST("/article/unlike"), this::unlikeArticle)
                         .andRoute(POST("/article/like"), this::likeArticle)
+                        .andRoute(POST("/column"), this::addColumn)
         );
+    }
+
+    /**
+     * 添加栏目
+     *
+     * @param request 请求
+     * @return 响应
+     */
+    private Mono<ServerResponse> addColumn(ServerRequest request) {
+        Result err = Result.error(PublicError.REQUEST_BODY_PARAM_NULL);
+
+        return securityUtil.getCurrentUser()
+                .flatMap(authentication -> request.bodyToMono(AddUserColumnDTO.class)
+                        .filter(dto -> dto.getTitle() != null)
+                        .flatMap(addUserColumnDTO -> userService.addColunm(authentication.getPrincipal().toString(), addUserColumnDTO))
+                        .flatMap(result -> ok().body(fromObject(result)))
+                        .switchIfEmpty(badRequest().body(fromObject(err)))
+                )
+                .switchIfEmpty(status(HttpStatus.UNAUTHORIZED).build());
+
+
     }
 
     /**

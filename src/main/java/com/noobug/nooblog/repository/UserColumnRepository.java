@@ -18,4 +18,6 @@ public interface UserColumnRepository extends JpaRepository<UserColumn, Long> {
     Long countByUser_IdAndTitle(Long id, String title);
 
     Long countByParentIdAndTitle(Long parentId, String title);
+
+    Long countByUserAccountAndTitle(String account, String title);
 }

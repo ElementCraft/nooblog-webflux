@@ -14,10 +14,8 @@ import com.noobug.nooblog.tools.entity.Result;
 import com.noobug.nooblog.tools.utils.CommonUtil;
 import com.noobug.nooblog.tools.utils.SecurityUtil;
 import com.noobug.nooblog.tools.utils.ValidateUtil;
-import com.noobug.nooblog.web.dto.UserFixInfoDTO;
-import com.noobug.nooblog.web.dto.UserInfoDTO;
-import com.noobug.nooblog.web.dto.UserLoginDTO;
-import com.noobug.nooblog.web.dto.UserRegDTO;
+import com.noobug.nooblog.web.dto.*;
+import com.noobug.nooblog.web.mapper.UserColumnMapper;
 import com.noobug.nooblog.web.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +61,9 @@ public class UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private UserColumnMapper userColumnMapper;
 
     @Autowired
     private TokenProvider tokenProvider;
@@ -403,5 +404,58 @@ public class UserService {
                         })
                         .orElse(Mono.just(Result.error(ArticleError.NON_EXIST_ID)))
                 ).orElse(Mono.just(Result.error(UserError.NON_EXIST_ID)));
+    }
+
+    /**
+     * 用户新增栏目
+     *
+     * @param account   用户帐号
+     * @param columnDTO 栏目DTO
+     * @return
+     */
+    public Mono<Result<Object>> addColunm(String account, AddUserColumnDTO columnDTO) {
+        String title = columnDTO.getTitle().trim();
+        if (title.isEmpty()) {
+            return Mono.just(Result.error(UserError.Column.TITLE_IS_NULL));
+        } else if (title.length() > UserConst.Limit.LEN_COLUMN_TITLE_MAX) {
+            return Mono.just(Result.error(UserError.Column.TITLE_TOO_LONG));
+        } else {
+            Long parentId = columnDTO.getParentId();
+            // 判断是否一级栏目
+            if (parentId == null || parentId == 0L) {
+
+                // 判断同级栏目标题是否重复
+                Long count = userColumnRepository.countByUserAccountAndTitle(account, title);
+                if (count > 0) {
+                    return Mono.just(Result.error(UserError.Column.DUPLICATE_TITLE));
+                }
+            } else {
+                Optional<UserColumn> col = userColumnRepository.findById(parentId);
+                // 为空说明指定的父级栏目不存在
+                if (!col.isPresent()) {
+                    return Mono.just(Result.error(UserError.Column.PARENT_IS_NULL));
+                } else {
+                    UserColumn parentColumn = col.get();
+                    // 判断指定的父级栏目是不是一级栏目
+                    if (parentColumn.getParentId() != null && parentColumn.getParentId() > 0) {
+                        return Mono.just(Result.error(UserError.Column.PARENT_NO_LEVEL1));
+                    } else {
+                        // 判断父级栏目下是否有重名栏目
+                        Long count = userColumnRepository.countByParentIdAndTitle(parentId, title);
+                        if (count > 0) {
+                            return Mono.just(Result.error(UserError.Column.DUPLICATE_TITLE));
+                        }
+                    }
+                }
+            }
+
+            User user = userRepository.findByAccountAndDeleted(account, Boolean.FALSE).get();
+
+            UserColumn resultColumn = userColumnMapper.toEntity(columnDTO);
+            resultColumn.setIsDefault(Boolean.FALSE);
+            resultColumn.setUser(user);
+            userColumnRepository.save(resultColumn);
+            return Mono.just(Result.ok());
+        }
     }
 }
