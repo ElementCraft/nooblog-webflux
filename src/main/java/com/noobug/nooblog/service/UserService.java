@@ -361,4 +361,44 @@ public class UserService {
                         .orElse(Mono.just(Result.error(ArticleError.NON_EXIST_ID)))
                 ).orElse(Mono.just(Result.error(UserError.NON_EXIST_ID)));
     }
+
+    /**
+     * 好评操作
+     * @param account 账号
+     * @param arrticleId 文章id
+     *
+     * @return
+     */
+    public Mono<Result<Object>> likeArticle(String account, Long arrticleId){
+
+        //查找用户，不存在返回error
+        return userRepository.findByAccountAndDeleted(account, Boolean.FALSE)
+                //查找文章,不存在返回error
+                .map(user -> articleService.getById(arrticleId)
+                            .map(article -> {
+                                //用户点赞该文章记录
+                                Optional<ArticleLike> articleLike = articleService.getUserArticleLike(user.getId(),arrticleId);
+
+                                //有记录则更新为好评
+                                if(articleLike.isPresent()){
+                                    ArticleLike dbLike = articleLike.get();
+                                    if ((dbLike.getStatus() == ArticleConst.Like.BAD)){
+                                        dbLike.setStatus(ArticleConst.Like.BAD);
+                                        articleService.saveArticleLike(dbLike);
+
+                                        //点赞数+1 差评-1
+                                        article.setGoodNumber(article.getGoodNumber() + 1);
+                                        article.setBadNumber(article.getBadNumber() - 1);
+                                    }
+                                }else{
+                                    ArticleLike newLike = new ArticleLike(null, user, article, ArticleConst.Like.GOOD);
+                                    articleService.saveArticleLike(newLike);
+                                    // 点赞数+1
+                                    article.setGoodNumber(article.getGoodNumber() + 1);
+                                }
+                                return  Mono.just(Result.ok());
+                            })
+                        .orElse(Mono.just(Result.error(ArticleError.NON_EXIST_ID)))
+                ).orElse(Mono.just(Result.error(UserError.NON_EXIST_ID)));
+    }
 }
