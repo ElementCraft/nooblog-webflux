@@ -105,6 +105,7 @@ public class UserService {
         String md5 = securityUtil.md5(regDTO.getPassword());
         regDTO.setPassword(md5);
 
+        // 填充默认字段
         User user = userMapper.regDTO2User(regDTO);
         user.setAuthenticated(Boolean.FALSE);
         user.setBanned(Boolean.FALSE);
@@ -112,6 +113,8 @@ public class UserService {
         user.setIsPublic(Boolean.TRUE);
         user.setScore(0);
         user.setSex(UserConst.Sex.UNKNOWN);
+
+        // 注册用户信息存入数据库
         user = userRepository.save(user);
 
         // 设置为用户角色
@@ -326,7 +329,7 @@ public class UserService {
      * @param articleId 文章ID
      * @return 结果
      */
-    public Mono<Result<Object>> unlikeArticle(String account, Long articleId, String ip) {
+    public Mono<Result<Object>> unlikeArticle(String account, Long articleId) {
 
         // 查用户，无则返回error
         return userRepository.findByAccountAndDeleted(account, Boolean.FALSE)
@@ -337,16 +340,16 @@ public class UserService {
                             Optional<ArticleLike> articleLike = articleService.getUserArticleLike(u.getId(), articleId);
 
                             // 有记录则更新成差评  否则新增记录
-                            if(articleLike.isPresent()){
+                            if (articleLike.isPresent()) {
                                 ArticleLike dbLike = articleLike.get();
-                                if(ArticleConst.Like.GOOD == dbLike.getStatus()){
+                                if (ArticleConst.Like.GOOD == dbLike.getStatus()) {
                                     dbLike.setStatus(ArticleConst.Like.BAD);
                                     articleService.saveArticleLike(dbLike);
                                     // 文章点赞数-1 差评数+1
                                     article.setGoodNumber(article.getGoodNumber() - 1);
                                     article.setBadNumber(article.getBadNumber() + 1);
                                 }
-                            }else{
+                            } else {
                                 ArticleLike newLike = new ArticleLike(null, u, article, ArticleConst.Like.BAD);
                                 articleService.saveArticleLike(newLike);
                                 // 文章差评数+1
@@ -364,40 +367,40 @@ public class UserService {
 
     /**
      * 好评操作
-     * @param account 账号
-     * @param arrticleId 文章id
      *
+     * @param account   账号
+     * @param articleId 文章id
      * @return
      */
-    public Mono<Result<Object>> likeArticle(String account, Long arrticleId){
+    public Mono<Result<Object>> likeArticle(String account, Long articleId) {
 
         //查找用户，不存在返回error
         return userRepository.findByAccountAndDeleted(account, Boolean.FALSE)
                 //查找文章,不存在返回error
-                .map(user -> articleService.getById(arrticleId)
-                            .map(article -> {
-                                //用户点赞该文章记录
-                                Optional<ArticleLike> articleLike = articleService.getUserArticleLike(user.getId(),arrticleId);
+                .map(user -> articleService.getById(articleId)
+                        .map(article -> {
+                            //用户点赞该文章记录
+                            Optional<ArticleLike> articleLike = articleService.getUserArticleLike(user.getId(), articleId);
 
-                                //有记录则更新为好评
-                                if(articleLike.isPresent()){
-                                    ArticleLike dbLike = articleLike.get();
-                                    if ((dbLike.getStatus() == ArticleConst.Like.BAD)){
-                                        dbLike.setStatus(ArticleConst.Like.BAD);
-                                        articleService.saveArticleLike(dbLike);
+                            //有记录则更新为好评
+                            if (articleLike.isPresent()) {
+                                ArticleLike dbLike = articleLike.get();
+                                if ((dbLike.getStatus() == ArticleConst.Like.BAD)) {
+                                    dbLike.setStatus(ArticleConst.Like.BAD);
+                                    articleService.saveArticleLike(dbLike);
 
-                                        //点赞数+1 差评-1
-                                        article.setGoodNumber(article.getGoodNumber() + 1);
-                                        article.setBadNumber(article.getBadNumber() - 1);
-                                    }
-                                }else{
-                                    ArticleLike newLike = new ArticleLike(null, user, article, ArticleConst.Like.GOOD);
-                                    articleService.saveArticleLike(newLike);
-                                    // 点赞数+1
+                                    //点赞数+1 差评-1
                                     article.setGoodNumber(article.getGoodNumber() + 1);
+                                    article.setBadNumber(article.getBadNumber() - 1);
                                 }
-                                return  Mono.just(Result.ok());
-                            })
+                            } else {
+                                ArticleLike newLike = new ArticleLike(null, user, article, ArticleConst.Like.GOOD);
+                                articleService.saveArticleLike(newLike);
+                                // 点赞数+1
+                                article.setGoodNumber(article.getGoodNumber() + 1);
+                            }
+                            return Mono.just(Result.ok());
+                        })
                         .orElse(Mono.just(Result.error(ArticleError.NON_EXIST_ID)))
                 ).orElse(Mono.just(Result.error(UserError.NON_EXIST_ID)));
     }

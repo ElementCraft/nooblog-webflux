@@ -55,6 +55,7 @@ public class UserRouter {
                         .andRoute(POST("/info"), this::fixUserInfo)
                         .andRoute(GET("/logs"), this::logs)
                         .andRoute(POST("/article/unlike"), this::unlikeArticle)
+                        .andRoute(POST("/article/like"), this::likeArticle)
         );
     }
 
@@ -65,8 +66,6 @@ public class UserRouter {
      * @return 响应
      */
     private Mono<ServerResponse> unlikeArticle(ServerRequest request) {
-        // 获取请求来源方地址
-        String ip = request.headers().host().getHostString();
 
         // 取URL参数，有进行处理 无返回400
         return request.queryParam("id")
@@ -75,7 +74,31 @@ public class UserRouter {
 
                     return securityUtil.getCurrentUser()
                             .flatMap(authentication -> {
-                                return userService.unlikeArticle(authentication.getPrincipal().toString(), articleId, ip)
+                                return userService.unlikeArticle(authentication.getPrincipal().toString(), articleId)
+                                        .flatMap(result -> ok().body(fromObject(result)))
+                                        .switchIfEmpty(status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                            })
+                            .switchIfEmpty(status(HttpStatus.UNAUTHORIZED).build());
+                })
+                .orElse(badRequest().build());
+    }
+
+    /**
+     * 用户对文章进行点赞
+     *
+     * @param request 请求
+     * @return 响应
+     */
+    private Mono<ServerResponse> likeArticle(ServerRequest request) {
+
+        // 取URL参数，有进行处理 无返回400
+        return request.queryParam("id")
+                .map(id -> {
+                    Long articleId = Long.valueOf(id);
+
+                    return securityUtil.getCurrentUser()
+                            .flatMap(authentication -> {
+                                return userService.likeArticle(authentication.getPrincipal().toString(), articleId)
                                         .flatMap(result -> ok().body(fromObject(result)))
                                         .switchIfEmpty(status(HttpStatus.INTERNAL_SERVER_ERROR).build());
                             })
@@ -85,6 +108,12 @@ public class UserRouter {
     }
 
 
+    /**
+     * FIXME 获取全部用户登录日志分页
+     *
+     * @param request
+     * @return
+     */
     private Mono<ServerResponse> logs(ServerRequest request) {
         Integer page = Integer.valueOf(request.queryParam("page").orElse("0"));
         Integer size = Integer.valueOf(request.queryParam("size").orElse(PublicConst.PAGE_SIZE.toString()));
