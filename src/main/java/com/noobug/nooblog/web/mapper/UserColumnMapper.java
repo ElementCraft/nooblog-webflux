@@ -12,6 +12,8 @@ import org.mapstruct.NullValueCheckStrategy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 
+import java.util.List;
+
 /**
  * 用户栏目 相关 Mapper
  *
@@ -20,4 +22,7 @@ import org.springframework.data.domain.PageImpl;
 @Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, uses = {UserMapper.class})
 public interface UserColumnMapper extends EntityMapper<AddUserColumnDTO, UserColumn> {
 
+    List<UserColumnInfoDTO> userColumns2UserColumnInfoDTOs(List<UserColumn> columns);
+
+    UserColumnInfoDTO userColumn2UserColumnInfoDTO(UserColumn column);
 }

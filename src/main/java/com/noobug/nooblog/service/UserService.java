@@ -413,7 +413,7 @@ public class UserService {
      * @param columnDTO 栏目DTO
      * @return
      */
-    public Mono<Result<Object>> addColunm(String account, AddUserColumnDTO columnDTO) {
+    public Mono<Result<Object>> addColumn(String account, AddUserColumnDTO columnDTO) {
         String title = columnDTO.getTitle().trim();
         if (title.isEmpty()) {
             return Mono.just(Result.error(UserError.Column.TITLE_IS_NULL));
@@ -454,8 +454,20 @@ public class UserService {
             UserColumn resultColumn = userColumnMapper.toEntity(columnDTO);
             resultColumn.setIsDefault(Boolean.FALSE);
             resultColumn.setUser(user);
+            resultColumn.setSortLevel(0);
             userColumnRepository.save(resultColumn);
             return Mono.just(Result.ok());
         }
+    }
+
+    /**
+     * 获取用户所有一级栏目
+     *
+     * @param account 帐号
+     * @return
+     */
+    public Mono<List<UserColumnInfoDTO>> col1(String account) {
+        List<UserColumn> columns = userColumnRepository.findAllByUserAccountAndIsDefaultAndParentIdIsNullOrParentId(account, Boolean.FALSE, 0L);
+        return Mono.just(userColumnMapper.userColumns2UserColumnInfoDTOs(columns));
     }
 }
