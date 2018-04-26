@@ -470,4 +470,16 @@ public class UserService {
         List<UserColumn> columns = userColumnRepository.findAllByUserAccountAndIsDefaultAndParentIdIsNullOrParentId(account, Boolean.FALSE, 0L);
         return Mono.just(userColumnMapper.userColumns2UserColumnInfoDTOs(columns));
     }
+
+    /**
+     * 获取用户指定一级栏目下的二级栏目
+     *
+     * @param account 帐号
+     * @param parentId 父级栏目ID
+     * @return
+     */
+    public Mono<List<UserColumnInfoDTO>> col2(String account, Long parentId) {
+        List<UserColumn> columns = userColumnRepository.findAllByParentIdAndIsDefault(parentId, Boolean.FALSE);
+        return Mono.just(userColumnMapper.userColumns2UserColumnInfoDTOs(columns));
+    }
 }

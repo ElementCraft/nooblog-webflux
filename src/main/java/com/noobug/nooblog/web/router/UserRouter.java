@@ -64,20 +64,6 @@ public class UserRouter {
     }
 
     /**
-     * 获取指定一级栏目下的二级栏目
-     * @param request
-     * @return
-     */
-    private Mono<ServerResponse> col2(ServerRequest request) {
-        return securityUtil.getCurrentUser()
-                .flatMap(authentication -> userService.col1(authentication.getPrincipal().toString())
-                        .flatMap(o -> ok().body(fromObject(o)))
-                        .switchIfEmpty(ok().body(fromObject(new ArrayList<>())))
-                )
-                .switchIfEmpty(status(HttpStatus.UNAUTHORIZED).build());
-    }
-
-    /**
      * 获取全部一级栏目
      *
      * @param request
@@ -90,6 +76,27 @@ public class UserRouter {
                         .switchIfEmpty(ok().body(fromObject(new ArrayList<>())))
                 )
                 .switchIfEmpty(status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    /**
+     * 获取指定一级栏目下的二级栏目
+     *
+     * @param request
+     * @return
+     */
+    private Mono<ServerResponse> col2(ServerRequest request) {
+        Result err = Result.error(PublicError.REQUEST_PARAM_ERROR);
+
+        return request.queryParam("id")
+                .map(parentId -> securityUtil.getCurrentUser()
+                        .flatMap(authentication -> userService.col2(authentication.getPrincipal().toString(), Long.valueOf(parentId))
+                                .flatMap(o -> ok().body(fromObject(o)))
+                                .switchIfEmpty(ok().body(fromObject(new ArrayList<>())))
+                        )
+                        .switchIfEmpty(status(HttpStatus.UNAUTHORIZED).build()))
+                .orElse(badRequest().body(fromObject(err)));
+
+
     }
 
     /**
