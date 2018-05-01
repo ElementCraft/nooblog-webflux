@@ -273,12 +273,12 @@ public class UserService {
     /**
      * 获取用户资料信息
      *
-     * @param id 用户ID
+     * @param account 帐号
      * @return 用户资料DTO
      */
     @Transactional(readOnly = true)
-    public Mono<Result<UserInfoDTO>> getUserInfoById(Long id) {
-        return userRepository.findByIdAndDeleted(id, Boolean.FALSE)
+    public Mono<Result<UserInfoDTO>> getUserInfoByAccount(String account) {
+        return userRepository.findByAccountAndDeleted(account, Boolean.FALSE)
                 .map(user -> {
                     UserInfoDTO dto = userMapper.user2InfoDTO(user);
                     return Mono.just(Result.ok(dto));

@@ -52,7 +52,7 @@ public class UserRouter {
                         .andRoute(POST("/login"), this::login)
                         .andRoute(POST("/icon/upload/{id}").and(accept(MediaType.MULTIPART_FORM_DATA)), this::uploadIcon)
                         .andRoute(POST("/auth/info/{id}"), this::addAuthInfo)
-                        .andRoute(GET("/info/{id}"), this::getUserInfo)
+                        .andRoute(GET("/info"), this::getUserInfo)
                         .andRoute(POST("/info"), this::fixUserInfo)
                         .andRoute(GET("/logs"), this::logs)
                         .andRoute(POST("/article/unlike"), this::unlikeArticle)
@@ -211,11 +211,13 @@ public class UserRouter {
      * @return 结果
      */
     private Mono<ServerResponse> getUserInfo(ServerRequest request) {
-        Long id = Long.valueOf(request.pathVariable("id"));
 
-        return userService.getUserInfoById(id)
-                .flatMap(o -> ok().body(fromObject(o)))
-                .switchIfEmpty(status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+        return securityUtil.getCurrentUser()
+                .flatMap(authentication -> userService.getUserInfoByAccount(authentication.getPrincipal().toString())
+                        .flatMap(o -> ok().body(fromObject(o)))
+                        .switchIfEmpty(status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+                )
+                .switchIfEmpty(status(HttpStatus.UNAUTHORIZED).build());
     }
 
     /**
@@ -255,9 +257,7 @@ public class UserRouter {
     private Mono<ServerResponse> reg(ServerRequest request) {
         Result err = Result.error(UserError.Reg.REQUIRE_IS_NULL);
 
-        return securityUtil.getCurrentUser().flatMap(authentication -> {
-
-            return request.bodyToMono(UserRegDTO.class)
+        return  request.bodyToMono(UserRegDTO.class)
                     .filter(regDTO -> regDTO.getAccount() != null)
                     .filter(regDTO -> regDTO.getPassword() != null)
                     .filter(regDTO -> regDTO.getEmail() != null)
@@ -265,9 +265,6 @@ public class UserRouter {
                     .flatMap(userService::reg)
                     .flatMap(result -> ok().body(fromObject(result)))
                     .switchIfEmpty(badRequest().body(fromObject(err)));
-        });
-
-
     }
 
     /**

@@ -45,7 +45,7 @@ public class AuthFilter implements WebFilter {
     @Autowired
     private UserRepository userRepository;
 
-    private ServerWebExchangeMatcher authMatcher = ServerWebExchangeMatchers.pathMatchers("/api/user/reg", "/api/article", "/api/user/article/**", "/api/admin/**");
+    private ServerWebExchangeMatcher authMatcher = ServerWebExchangeMatchers.pathMatchers( "/api/user/info", "/api/user/col1", "/api/user/col2", "/api/user/column", "/api/article", "/api/user/article/**", "/api/admin/**");
     private ServerSecurityContextRepository securityContextRepository = NoOpServerSecurityContextRepository.getInstance();
 
     @Override
@@ -69,6 +69,7 @@ public class AuthFilter implements WebFilter {
         String password = (String) authentication.getCredentials();
 
 
+        // 验证用户帐号密码
         Optional<User> user = userRepository.findByAccountAndPasswordAndBannedAndDeleted(account, password, Boolean.FALSE, Boolean.FALSE);
         if (!user.isPresent()) {
             return Mono.empty();
@@ -102,10 +103,12 @@ public class AuthFilter implements WebFilter {
         try {
             signedJWT = SignedJWT.parse(credentials);
             signedJWT.verify(new MACVerifier(secret));
+
             subject = signedJWT.getJWTClaimsSet().getSubject();
             auths = (String) signedJWT.getJWTClaimsSet().getClaim(JwtConst.AUTHORITIES_CLAIM_KEY);
             password = (String) signedJWT.getJWTClaimsSet().getClaim(JwtConst.PASSWORD_CLAIM_KEY);
 
+            // 权限字符串拆分
             authorities = Optional.ofNullable(auths)
                     .map(o -> Stream.of(auths.split(JwtConst.AUTHORITIES_CLAIM_DELIMITER))
                             .filter(str -> str != null && !str.isEmpty())
