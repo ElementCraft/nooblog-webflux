@@ -50,7 +50,7 @@ public class UserRouter {
         return nest(path("/api/user"),
                 route(POST("/reg"), this::reg)
                         .andRoute(POST("/login"), this::login)
-                        .andRoute(POST("/icon/upload/{id}").and(accept(MediaType.MULTIPART_FORM_DATA)), this::uploadIcon)
+                        .andRoute(POST("/icon/upload").and(accept(MediaType.MULTIPART_FORM_DATA)), this::uploadIcon)
                         .andRoute(POST("/auth/info/{id}"), this::addAuthInfo)
                         .andRoute(GET("/info"), this::getUserInfo)
                         .andRoute(POST("/info"), this::fixUserInfo)
@@ -60,7 +60,20 @@ public class UserRouter {
                         .andRoute(POST("/column"), this::addColumn)
                         .andRoute(GET("/col1"), this::col1)
                         .andRoute(GET("/col2"), this::col2)
+                        .andRoute(GET("/article"), this::getArticles)
         );
+    }
+
+    private Mono<ServerResponse> getArticles(ServerRequest request) {
+        Integer page = Integer.valueOf(request.queryParam("page").orElse("1"));
+        Integer size = Integer.valueOf(request.queryParam("size").orElse(PublicConst.PAGE_SIZE.toString()));
+
+        return securityUtil.getCurrentUser()
+                .flatMap(authentication -> userService.getArticlesPage(authentication.getPrincipal().toString(), PageRequest.of(page - 1, size))
+                        .flatMap(o -> ok().body(fromObject(o)))
+                        .switchIfEmpty(ok().body(fromObject(new ArrayList<>())))
+                )
+                .switchIfEmpty(status(HttpStatus.UNAUTHORIZED).build());
     }
 
     /**

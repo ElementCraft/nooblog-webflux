@@ -10,15 +10,19 @@ import com.noobug.nooblog.repository.UserLogRepository;
 import com.noobug.nooblog.repository.UserRepository;
 import com.noobug.nooblog.repository.UserRoleRepository;
 import com.noobug.nooblog.security.TokenProvider;
+import com.noobug.nooblog.tools.entity.LayuiResult;
 import com.noobug.nooblog.tools.entity.Result;
 import com.noobug.nooblog.tools.utils.CommonUtil;
 import com.noobug.nooblog.tools.utils.SecurityUtil;
 import com.noobug.nooblog.tools.utils.ValidateUtil;
 import com.noobug.nooblog.web.dto.*;
+import com.noobug.nooblog.web.mapper.ArticleMapper;
 import com.noobug.nooblog.web.mapper.UserColumnMapper;
 import com.noobug.nooblog.web.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.Part;
@@ -64,6 +68,9 @@ public class UserService {
 
     @Autowired
     private UserColumnMapper userColumnMapper;
+
+    @Autowired
+    private ArticleMapper articleMapper;
 
     @Autowired
     private TokenProvider tokenProvider;
@@ -253,18 +260,20 @@ public class UserService {
         } else if (!UserConst.Sex.ALL.contains(sex)) {
             return Mono.just(Result.error(UserError.Info.UNKNOWN_SEX_TYPE));
         } else {
-            File file = new File(iconPath);
-            if (!file.exists()) {
-                return Mono.just(Result.error(UserError.Info.UNKNOWN_ICON_PATH));
-            } else {
-                User dbUser = user.get();
-                dbUser.setIsPublic(userFixInfoDTO.getIsPublic());
-                dbUser.setSex(sex);
-                dbUser.setSignature(signature);
-                dbUser.setNickName(nickName);
-                dbUser.setIconPath(iconPath);
-                userRepository.save(dbUser);
+            if(iconPath != null){
+                File file = new File(iconPath);
+                if (!file.exists()) {
+                    return Mono.just(Result.error(UserError.Info.UNKNOWN_ICON_PATH));
+                }
             }
+
+            User dbUser = user.get();
+            dbUser.setIsPublic(userFixInfoDTO.getIsPublic());
+            dbUser.setSex(sex);
+            dbUser.setSignature(signature);
+            dbUser.setNickName(nickName);
+            dbUser.setIconPath(iconPath);
+            userRepository.save(dbUser);
         }
 
         return Mono.just(Result.ok());
@@ -481,5 +490,17 @@ public class UserService {
     public Mono<List<UserColumnInfoDTO>> col2(String account, Long parentId) {
         List<UserColumn> columns = userColumnRepository.findAllByParentIdAndIsDefault(parentId, Boolean.FALSE);
         return Mono.just(userColumnMapper.userColumns2UserColumnInfoDTOs(columns));
+    }
+
+    /**
+     * 获取用户文章列表分页
+     * @param account 帐号
+     * @param pageable 分页参数
+     * @return
+     */
+    public Mono<LayuiResult<List<ArticleListDTO>>> getArticlesPage(String account, Pageable pageable) {
+        Page<Article> articles = articleService.getUserArticleListPage(account, pageable);
+
+        return Mono.just(LayuiResult.ok((int)articles.getTotalElements(), articleMapper.toDto(articles.getContent())) );
     }
 }

@@ -19,4 +19,5 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     Optional<Article> findByIdAndStatusNot(Long articleId, int status);
 
+    Page<Article> findAllByUserColumn_UserAccountAndStatusNot(String account, int status, Pageable pageable);
 }

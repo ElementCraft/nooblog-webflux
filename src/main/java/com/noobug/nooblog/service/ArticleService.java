@@ -233,14 +233,35 @@ public class ArticleService {
         return articleLikeRepository.save(articleLike);
     }
 
-    public  Mono<Result<Object>> doRemark(Long arrticleId){
+    public Mono<Result<Object>> doRemark(Long arrticleId) {
         return articleRepository.findById(arrticleId)
                 .map(article -> {
-                    article.setGoodNumber(article.getGoodNumber()+1);
+                    article.setGoodNumber(article.getGoodNumber() + 1);
                     articleRepository.save(article);
                     return Mono.just(Result.ok());
                 }).orElse(Mono.just(Result.error(ArticleError.NON_EXIST_ID)));
     }
 
+    /**
+     * 获取指定用户的文章列表分页
+     *
+     * @param account  用户帐号
+     * @param pageable 分页参数
+     * @return
+     */
+    public Page<Article> getUserArticleListPage(String account, Pageable pageable) {
+        return articleRepository.findAllByUserColumn_UserAccountAndStatusNot(account, ArticleConst.Status.DELETED, pageable);
+    }
 
+    /**
+     * 通过文章ID获取文章正文
+     *
+     * @param id ID
+     * @return 正文内容
+     */
+    public Mono<Result<String>> getContentById(Long id) {
+        return articleRepository.findById(id)
+                .map(article -> Mono.just(Result.ok(article.getContent())))
+                .orElse(Mono.just(Result.error(ArticleError.NON_EXIST_ID)));
+    }
 }

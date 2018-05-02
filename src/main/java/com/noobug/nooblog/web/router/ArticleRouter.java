@@ -40,6 +40,7 @@ public class ArticleRouter {
     RouterFunction<?> articleRoutes() {
         return nest(path("/api/article"),
                 route(DELETE("/{id}"), this::del)
+                        .andRoute(GET("/content/{id}"), this::getContent)
                         .andRoute(POST("/"), this::add)
                         .andRoute(PUT("/"), this::edit)
                         .andRoute(GET("/"), this::getPage)
@@ -47,6 +48,14 @@ public class ArticleRouter {
                         .andRoute(PUT("/unban/{id}"), this::unban)
         );
 
+    }
+
+    private Mono<ServerResponse> getContent(ServerRequest request) {
+        Long id = Long.valueOf(request.pathVariable("id"));
+
+        return articleService.getContentById(id)
+                .flatMap(o -> ok().body(fromObject(o)))
+                .switchIfEmpty(status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
     private Mono<ServerResponse> edit(ServerRequest request) {

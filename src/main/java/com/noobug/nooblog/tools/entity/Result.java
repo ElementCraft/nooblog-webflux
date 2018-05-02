@@ -1,8 +1,8 @@
 package com.noobug.nooblog.tools.entity;
 
 public class Result<T> {
-    private static final String DEFAULT_SUCCESS_MSG = "成功";
-    private static final String DEFAULT_ERROR_MSG = "失败";
+    protected static final String DEFAULT_SUCCESS_MSG = "成功";
+    protected static final String DEFAULT_ERROR_MSG = "失败";
 
     protected Integer code;
 

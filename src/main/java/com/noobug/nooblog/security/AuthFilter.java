@@ -45,7 +45,7 @@ public class AuthFilter implements WebFilter {
     @Autowired
     private UserRepository userRepository;
 
-    private ServerWebExchangeMatcher authMatcher = ServerWebExchangeMatchers.pathMatchers( "/api/user/info", "/api/user/col1", "/api/user/col2", "/api/user/column", "/api/article", "/api/user/article/**", "/api/admin/**");
+    private ServerWebExchangeMatcher authMatcher = ServerWebExchangeMatchers.pathMatchers( "/api/user/info", "/api/user/col1", "/api/user/col2", "/api/user/column", "/api/article", "/api/user/article", "/api/user/article/**", "/api/admin/**");
     private ServerSecurityContextRepository securityContextRepository = NoOpServerSecurityContextRepository.getInstance();
 
     @Override
