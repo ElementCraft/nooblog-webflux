@@ -43,12 +43,23 @@ public class ArticleRouter {
                         .andRoute(GET("/content/{id}"), this::getContent)
                         .andRoute(POST("/"), this::add)
                         .andRoute(PUT("/"), this::edit)
-                        .andRoute(GET("/"), this::getPage)
+                        .andRoute(GET("/all"), this::getPage)
+                        .andRoute(GET("/info/{id}"), this::getInfoById)
+                        .andRoute(GET("/hot"), this::getHotByPage)
                         .andRoute(PUT("/ban/{id}"), this::ban)
                         .andRoute(PUT("/unban/{id}"), this::unban)
         );
 
     }
+
+    private Mono<ServerResponse> getInfoById(ServerRequest request) {
+        Long id = Long.valueOf(request.pathVariable("id"));
+
+        return articleService.getById(id)
+                .map(o -> ok().body(fromObject(o)))
+                .orElse(status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+    }
+
 
     private Mono<ServerResponse> getContent(ServerRequest request) {
         Long id = Long.valueOf(request.pathVariable("id"));
@@ -122,6 +133,16 @@ public class ArticleRouter {
         Integer size = Integer.valueOf(request.queryParam("size").orElse(PublicConst.PAGE_SIZE.toString()));
 
         return articleService.getAllByPage(PageRequest.of(page, size))
+                .flatMap(articles -> ok().body(fromObject(articles)))
+                .switchIfEmpty(ok().body(fromObject(new ArrayList<>())));
+    }
+
+
+    private Mono<ServerResponse> getHotByPage(ServerRequest request) {
+        Integer page = Integer.valueOf(request.queryParam("page").orElse("0"));
+        Integer size = Integer.valueOf(request.queryParam("size").orElse(PublicConst.PAGE_SIZE.toString()));
+
+        return articleService.getAllHotByPage(PageRequest.of(page, size))
                 .flatMap(articles -> ok().body(fromObject(articles)))
                 .switchIfEmpty(ok().body(fromObject(new ArrayList<>())));
     }

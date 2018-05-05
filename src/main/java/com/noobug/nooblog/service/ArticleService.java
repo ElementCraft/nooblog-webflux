@@ -15,6 +15,7 @@ import com.noobug.nooblog.web.mapper.ArticleMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,7 +72,7 @@ public class ArticleService {
      */
     @Transactional(readOnly = true)
     public Mono<Page<ArticleListDTO>> getAllByPage(Pageable pageable) {
-        Page<Article> articles = articleRepository.findAllByStatusNot(ArticleConst.Status.DELETED, pageable);
+        Page<Article> articles = articleRepository.findAllByIsPrivateAndStatusNotOrderByGmtCreateDesc(Boolean.FALSE, ArticleConst.Status.DELETED, pageable);
 
         return Mono.just(articleMapper.toListDTOPage(articles));
     }
@@ -263,5 +264,12 @@ public class ArticleService {
         return articleRepository.findById(id)
                 .map(article -> Mono.just(Result.ok(article.getContent())))
                 .orElse(Mono.just(Result.error(ArticleError.NON_EXIST_ID)));
+    }
+
+    @Transactional(readOnly = true)
+    public Mono<Page<ArticleListDTO>> getAllHotByPage(Pageable pageable) {
+        Page<Article> articles = articleRepository.findAllByIsPrivateAndStatusNotOrderByGoodNumberDescCommentNumberDesc(Boolean.FALSE, ArticleConst.Status.DELETED, pageable);
+
+        return Mono.just(articleMapper.toListDTOPage(articles));
     }
 }

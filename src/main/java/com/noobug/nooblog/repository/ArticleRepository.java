@@ -15,6 +15,8 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     Page<Article> findAllByUserColumnUserIdAndStatusNot(long id, int status, Pageable pageable);
 
+    Page<Article> findAllByIsPrivateAndStatusNotOrderByGoodNumberDescCommentNumberDesc(Boolean isPrivate, int status, Pageable pageable);
+
     Page<Article> findAllByIsPrivateAndStatusNotOrderByGmtCreateDesc(Boolean isPrivate, int status, Pageable pageable);
 
     Optional<Article> findByIdAndStatusNot(Long articleId, int status);
