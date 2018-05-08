@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: #spring.profiles.active#
+    active: prod
   jackson:
     time-zone: GMT+8
     serialization:
